@@ -43,4 +43,10 @@ impl Div {
         self.height = height;
         self
     }
+
+    /// Set the children of the div
+    pub fn with_children(mut self, children: Vec<Div>) -> Self {
+        self.children = children;
+        self
+    }
 }
