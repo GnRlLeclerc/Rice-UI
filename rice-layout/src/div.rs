@@ -1,6 +1,6 @@
 //! A simple div element
 
-use crate::size::Size;
+use crate::{layout::Layout, size::Size};
 
 #[derive(Debug, Clone)]
 pub struct Div {
@@ -10,6 +10,8 @@ pub struct Div {
     pub height: Size,
     /// Children elements
     pub children: Vec<Div>,
+    /// Layout for the children
+    pub layout: Layout,
 }
 
 impl Default for Div {
@@ -18,6 +20,7 @@ impl Default for Div {
             width: Size::Fit,
             height: Size::Fit,
             children: vec![],
+            layout: Layout::Vertical,
         }
     }
 }
@@ -29,6 +32,7 @@ impl Div {
             width,
             height,
             children: vec![],
+            layout: Layout::Vertical,
         }
     }
 
@@ -47,6 +51,12 @@ impl Div {
     /// Set the children of the div
     pub fn with_children(mut self, children: Vec<Div>) -> Self {
         self.children = children;
+        self
+    }
+
+    /// Set the layout of the div
+    pub fn with_layout(mut self, layout: Layout) -> Self {
+        self.layout = layout;
         self
     }
 }

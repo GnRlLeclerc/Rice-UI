@@ -1,3 +1,4 @@
+pub mod arena;
 pub mod div;
 pub mod layout;
 pub mod rect;
@@ -5,7 +6,7 @@ pub mod size;
 
 #[cfg(test)]
 mod tests {
-    use crate::{div::Div, layout::Arena, size::Size};
+    use crate::{arena::Arena, div::Div, size::Size};
 
     #[test]
     fn test_div() {
