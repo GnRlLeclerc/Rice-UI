@@ -5,3 +5,7 @@ version = 4
 [[package]]
 name = "rice-layout"
 version = "0.1.0"
+
+[[package]]
+name = "rice-wgpu"
+version = "0.1.0"

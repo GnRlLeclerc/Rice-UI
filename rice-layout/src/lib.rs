@@ -1,14 +1,14 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub mod div;
+pub mod size;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::{div::Div, size::Size};
 
     #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    fn test_div() {
+        let div = Div::default();
+        assert_eq!(div.height, Size::Fit);
+        assert_eq!(div.width, Size::Fit);
     }
 }
