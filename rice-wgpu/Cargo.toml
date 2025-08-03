@@ -1,4 +1,6 @@
 [package]
-name = "rice-layout"
+name = "rice-wgpu"
 version = "0.1.0"
 edition = "2024"
+
+[dependencies]
