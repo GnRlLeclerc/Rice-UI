@@ -1,4 +1,6 @@
 pub mod div;
+pub mod layout;
+pub mod rect;
 pub mod size;
 
 #[cfg(test)]

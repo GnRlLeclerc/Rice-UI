@@ -8,6 +8,8 @@ pub struct Div {
     pub width: Size,
     /// Height constraint
     pub height: Size,
+    /// Children elements
+    pub children: Vec<Div>,
 }
 
 impl Default for Div {
@@ -15,6 +17,30 @@ impl Default for Div {
         Div {
             width: Size::Fit,
             height: Size::Fit,
+            children: vec![],
         }
+    }
+}
+
+impl Div {
+    /// Create a new div with specified width and height
+    pub fn new(width: Size, height: Size) -> Self {
+        Div {
+            width,
+            height,
+            children: vec![],
+        }
+    }
+
+    /// Set the width of the div
+    pub fn with_width(mut self, width: Size) -> Self {
+        self.width = width;
+        self
+    }
+
+    /// Set the height of the div
+    pub fn with_height(mut self, height: Size) -> Self {
+        self.height = height;
+        self
     }
 }
