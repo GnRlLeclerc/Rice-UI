@@ -2,7 +2,7 @@
 
 use slotmap::{DefaultKey, SlotMap};
 
-use crate::{div::Div, rect::Rect, size::Size};
+use crate::{div::Div, layout::Layout, rect::Rect, size::Size};
 
 pub struct Arena {
     /// Rect arena for layout nodes
@@ -23,7 +23,7 @@ impl Arena {
         let root_key = self.recurse_fixed_width(root);
 
         // 2nd pass: compute grow widths (bottom-up)
-        // TODO:
+        self.recurse_grow_width(root_key, root);
 
         // Return root key
         root_key
@@ -71,5 +71,39 @@ impl Arena {
     // ********************************************************************* //
 
     // Recursive grow width computation pass.
-    fn recurse_grow_width(&mut self, key: DefaultKey, div: &Div) {}
+    fn recurse_grow_width(&mut self, key: DefaultKey, div: &Div) {
+        // Clone children keys to avoid borrowing issues
+        let children = self.nodes[key].children.clone();
+
+        // Recurse children sizes
+        for (child_key, child_div) in children.iter().zip(&div.children) {
+            self.recurse_grow_width(*child_key, child_div);
+        }
+
+        // Now, get their heights and widths, and this will set the current one
+        // IF THEY ARE FIT (to children)
+        match div.width {
+            Size::Fit => {
+                let mut width: usize = 0;
+                match div.layout {
+                    // Vertical layout: width is max of children widths
+                    Layout::Vertical => {
+                        for child in &children {
+                            width = width.max(self.nodes[*child].width);
+                        }
+                    }
+                    // Horizontal layout: width is sum of children widths
+                    Layout::Horizontal => {
+                        for child in &children {
+                            width += self.nodes[*child].width;
+                        }
+                    }
+                }
+                // Assign back to the current node
+                self.nodes[key].width = width;
+            }
+            // If fixed size, nothing to be done
+            _ => {}
+        }
+    }
 }

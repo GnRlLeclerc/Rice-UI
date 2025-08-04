@@ -59,4 +59,16 @@ impl Div {
         self.layout = layout;
         self
     }
+
+    /// Set layout to vertical
+    pub fn vertical(mut self) -> Self {
+        self.layout = Layout::Vertical;
+        self
+    }
+
+    /// Set layout to horizontal
+    pub fn horizontal(mut self) -> Self {
+        self.layout = Layout::Horizontal;
+        self
+    }
 }
