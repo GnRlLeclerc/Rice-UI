@@ -12,7 +12,7 @@ Inspired by the [Clay](https://github.com/nicbarker/clay) UI layout library.
 ## Roadmap
 
 - [ ] layout computation framework
-  - [ ] fixed size components
+  - [x] fixed size components
   - [ ] growable size components
   - [ ] text components (wrapping)
   - [ ] alignment

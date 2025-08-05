@@ -1,6 +1,6 @@
 //! A simple div element
 
-use crate::{layout::Layout, size::Size};
+use crate::{Insets, layout::Layout, size::Size};
 
 #[derive(Debug, Clone)]
 pub struct Div {
@@ -8,10 +8,14 @@ pub struct Div {
     pub width: Size,
     /// Height constraint
     pub height: Size,
-    /// Children elements
-    pub children: Vec<Div>,
+    /// Margin insets
+    pub margin: Insets,
+    /// Padding insets
+    pub padding: Insets,
     /// Layout for the children
     pub layout: Layout,
+    /// Children elements
+    pub children: Vec<Div>,
 }
 
 impl Default for Div {
@@ -19,6 +23,8 @@ impl Default for Div {
         Div {
             width: Size::Fit,
             height: Size::Fit,
+            margin: Insets::default(),
+            padding: Insets::default(),
             children: vec![],
             layout: Layout::Vertical,
         }
@@ -31,6 +37,8 @@ impl Div {
         Div {
             width,
             height,
+            margin: Insets::default(),
+            padding: Insets::default(),
             children: vec![],
             layout: Layout::Vertical,
         }
@@ -69,6 +77,18 @@ impl Div {
     /// Set layout to horizontal
     pub fn horizontal(mut self) -> Self {
         self.layout = Layout::Horizontal;
+        self
+    }
+
+    /// Set the margin insets
+    pub fn with_margin(mut self, margin: Insets) -> Self {
+        self.margin = margin;
+        self
+    }
+
+    /// Set the padding insets
+    pub fn with_padding(mut self, padding: Insets) -> Self {
+        self.padding = padding;
         self
     }
 }

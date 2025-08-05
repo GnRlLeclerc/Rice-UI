@@ -8,9 +8,9 @@ use crate::{div::Div, layout::Layout, rect::Rect, size::Size};
 /// one while still being able to access the others.
 pub struct Arena {
     /// Rect nodes
-    pub(crate) nodes: Vec<Rect>,
+    pub nodes: Vec<Rect>,
     /// Rect children
-    pub(crate) children: Vec<Vec<usize>>,
+    pub children: Vec<Vec<usize>>,
     /// Keep track of free slots in the vector
     pub(crate) free: Vec<usize>,
 }
@@ -125,7 +125,7 @@ impl Arena {
 
     /// Remove a rectangle from the arena by its key.
     /// Its children are also removed.
-    fn remove(&mut self, key: usize) {
+    pub fn remove(&mut self, key: usize) {
         recurse_free(key, &mut self.free, &self.children);
     }
 }
@@ -154,21 +154,25 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
     // Compute current node size from children if size policy is Fit.
     match div.width {
         Size::Fit => {
-            let mut width: usize = 0;
+            let mut width = 0;
             match div.layout {
-                // Vertical layout: width is max of children widths
+                // Vertical layout: width is max of children widths + margins
                 Layout::Vertical => {
-                    for child in children {
-                        width = width.max(nodes[*child].width);
+                    for (index, child) in children.iter().zip(div.children.iter()) {
+                        width =
+                            width.max(nodes[*index].width + child.margin.left + child.margin.right);
                     }
                 }
-                // Horizontal layout: width is sum of children widths
+                // Horizontal layout: width is sum of children widths + margins
                 Layout::Horizontal => {
-                    for child in children {
-                        width += nodes[*child].width;
+                    for (index, child) in children.iter().zip(div.children.iter()) {
+                        width += nodes[*index].width + child.margin.left + child.margin.right;
                     }
                 }
             }
+            // Add parent padding
+            width += div.padding.left + div.padding.right;
+
             // Assign back to the current node
             nodes[node].width = width;
         }
@@ -204,21 +208,25 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
     // Compute current node size from children if size policy is Fit.
     match div.height {
         Size::Fit => {
-            let mut height: usize = 0;
+            let mut height = 0;
             match div.layout {
-                // Vertical layout: height is sum of children heights
+                // Vertical layout: height is sum of children heights + margins
                 Layout::Vertical => {
-                    for child in children {
-                        height += nodes[*child].height;
+                    for (index, child) in children.iter().zip(div.children.iter()) {
+                        height += nodes[*index].height + child.margin.top + child.margin.bottom;
                     }
                 }
-                // Horizontal layout: height is max of children heights
+                // Horizontal layout: height is max of children heights + margins
                 Layout::Horizontal => {
-                    for child in children {
-                        height = height.max(nodes[*child].height);
+                    for (index, child) in children.iter().zip(div.children.iter()) {
+                        height = height
+                            .max(nodes[*index].height + child.margin.top + child.margin.bottom);
                     }
                 }
             }
+            // Add parent padding
+            height += div.padding.top + div.padding.bottom;
+
             // Assign back to the current node
             nodes[node].height = height;
         }
