@@ -1,8 +1,14 @@
-pub mod arena;
-pub mod div;
-pub mod layout;
-pub mod rect;
-pub mod size;
+mod arena;
+mod div;
+mod layout;
+mod rect;
+mod size;
+
+pub use arena::Arena;
+pub use div::Div;
+pub use layout::Layout;
+pub use rect::Rect;
+pub use size::Size;
 
 #[cfg(test)]
 mod tests {
@@ -68,5 +74,43 @@ mod tests {
         assert_eq!(child1.width, 50);
         let child2 = &arena.nodes[arena.children[key][1]];
         assert_eq!(child2.width, 100);
+    }
+
+    #[test]
+    fn test_fit_heights_vertical() {
+        let mut arena = Arena::new();
+        let div = Div::new(Size::Fit, Size::Fit)
+            .with_children(vec![
+                Div::new(Size::Fixed(50), Size::Fixed(100)),
+                Div::new(Size::Fixed(100), Size::Fixed(200)),
+            ])
+            .vertical();
+
+        let key = arena.compute(&div);
+        let root = &arena.nodes[key];
+        assert_eq!(root.height, 300); // Should be the sum of children heights
+        let child1 = &arena.nodes[arena.children[key][0]];
+        assert_eq!(child1.height, 100);
+        let child2 = &arena.nodes[arena.children[key][1]];
+        assert_eq!(child2.height, 200);
+    }
+
+    #[test]
+    fn test_fit_heights_horizontal() {
+        let mut arena = Arena::new();
+        let div = Div::new(Size::Fit, Size::Fit)
+            .with_children(vec![
+                Div::new(Size::Fixed(50), Size::Fixed(100)),
+                Div::new(Size::Fixed(100), Size::Fixed(200)),
+            ])
+            .horizontal();
+
+        let key = arena.compute(&div);
+        let root = &arena.nodes[key];
+        assert_eq!(root.height, 200); // Should be the max of children heights
+        let child1 = &arena.nodes[arena.children[key][0]];
+        assert_eq!(child1.height, 100);
+        let child2 = &arena.nodes[arena.children[key][1]];
+        assert_eq!(child2.height, 200);
     }
 }

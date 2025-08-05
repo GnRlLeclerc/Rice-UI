@@ -31,11 +31,15 @@ impl Arena {
         let root_key = self.compute_fixed_width(root);
 
         // 2nd pass: compute grow widths (bottom-up)
-        self.grow_width(root_key, root);
+        self.compute_grow_width(root_key, root);
 
         // 3rd pass: wrap text (todo)
 
-        // 4th pass: compute fixed heights (top-down) (todo)
+        // 4th pass: compute fixed heights (top-down)
+        self.compute_fixed_height(root_key, root);
+
+        // 5th pass: compute grow heights (bottom-up)
+        self.compute_grow_height(root_key, root);
 
         // Return root key
         root_key
@@ -75,7 +79,7 @@ impl Arena {
     // ********************************************************************* //
 
     // Recursive grow width computation pass.
-    fn grow_width(&mut self, key: usize, div: &Div) {
+    fn compute_grow_width(&mut self, key: usize, div: &Div) {
         recurse_grow_width(key, div, &mut self.nodes, &self.children);
     }
 
@@ -83,7 +87,19 @@ impl Arena {
     //                         4TH PASS: FIXED HEIGHTS                       //
     // ********************************************************************* //
 
-    // TODO
+    // Recursive fixed height computation pass.
+    fn compute_fixed_height(&mut self, key: usize, div: &Div) {
+        recurse_fixed_height(key, div, &mut self.nodes, &self.children);
+    }
+
+    // ********************************************************************* //
+    //                          5TH PASS: GROW WIDTHS                        //
+    // ********************************************************************* //
+
+    // Recursive grow height computation pass.
+    fn compute_grow_height(&mut self, key: usize, div: &Div) {
+        recurse_grow_height(key, div, &mut self.nodes, &self.children);
+    }
 
     // ********************************************************************* //
     //                            SLOTMAP UTILITIES                          //
@@ -155,6 +171,56 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
             }
             // Assign back to the current node
             nodes[node].width = width;
+        }
+        // If fixed size, nothing to be done
+        _ => {}
+    }
+}
+
+/// Recursive fixed height computation pass.
+/// Is an auxiliary function for fine-grained borrowing.
+fn recurse_fixed_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[Vec<usize>]) {
+    nodes[node].height = match div.height {
+        Size::Fixed(h) => h,
+        Size::Fit => 0, // Will be computed later
+    };
+
+    // Recurse children sizes
+    for (index, child_div) in children[node].iter().zip(div.children.iter()) {
+        recurse_fixed_height(*index, child_div, nodes, children);
+    }
+}
+
+/// Compute the height of the current node based on its children.
+/// This is an auxiliary function for fine-grained borrowing.
+fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[Vec<usize>]) {
+    // Recurse children sizes
+    for (index, child_div) in children[node].iter().zip(div.children.iter()) {
+        recurse_grow_height(*index, child_div, nodes, children);
+    }
+
+    let children = &children[node];
+
+    // Compute current node size from children if size policy is Fit.
+    match div.height {
+        Size::Fit => {
+            let mut height: usize = 0;
+            match div.layout {
+                // Vertical layout: height is sum of children heights
+                Layout::Vertical => {
+                    for child in children {
+                        height += nodes[*child].height;
+                    }
+                }
+                // Horizontal layout: height is max of children heights
+                Layout::Horizontal => {
+                    for child in children {
+                        height = height.max(nodes[*child].height);
+                    }
+                }
+            }
+            // Assign back to the current node
+            nodes[node].height = height;
         }
         // If fixed size, nothing to be done
         _ => {}
