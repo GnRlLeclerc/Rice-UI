@@ -12,6 +12,8 @@ pub struct Div {
     pub margin: Insets,
     /// Padding insets
     pub padding: Insets,
+    /// Border (acts as additional margin)
+    pub border: Insets,
     /// Layout for the children
     pub layout: Layout,
     /// Children elements
@@ -25,6 +27,7 @@ impl Default for Div {
             height: Size::Fit,
             margin: Insets::default(),
             padding: Insets::default(),
+            border: Insets::default(),
             children: vec![],
             layout: Layout::Vertical,
         }
@@ -39,6 +42,7 @@ impl Div {
             height,
             margin: Insets::default(),
             padding: Insets::default(),
+            border: Insets::default(),
             children: vec![],
             layout: Layout::Vertical,
         }
@@ -89,6 +93,12 @@ impl Div {
     /// Set the padding insets
     pub fn with_padding(mut self, padding: Insets) -> Self {
         self.padding = padding;
+        self
+    }
+
+    /// Set the border insets
+    pub fn with_border(mut self, border: Insets) -> Self {
+        self.border = border;
         self
     }
 }

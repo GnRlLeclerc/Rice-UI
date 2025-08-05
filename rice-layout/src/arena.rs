@@ -156,17 +156,26 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
         Size::Fit => {
             let mut width = 0;
             match div.layout {
-                // Vertical layout: width is max of children widths + margins
+                // Vertical layout: width is max of children widths + margins + borders
                 Layout::Vertical => {
                     for (index, child) in children.iter().zip(div.children.iter()) {
-                        width =
-                            width.max(nodes[*index].width + child.margin.left + child.margin.right);
+                        width = width.max(
+                            nodes[*index].width
+                                + child.margin.left
+                                + child.margin.right
+                                + child.border.left
+                                + child.border.right,
+                        );
                     }
                 }
-                // Horizontal layout: width is sum of children widths + margins
+                // Horizontal layout: width is sum of children widths + margins + borders
                 Layout::Horizontal => {
                     for (index, child) in children.iter().zip(div.children.iter()) {
-                        width += nodes[*index].width + child.margin.left + child.margin.right;
+                        width += nodes[*index].width
+                            + child.margin.left
+                            + child.margin.right
+                            + child.border.left
+                            + child.border.right;
                     }
                 }
             }
@@ -210,17 +219,26 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
         Size::Fit => {
             let mut height = 0;
             match div.layout {
-                // Vertical layout: height is sum of children heights + margins
+                // Vertical layout: height is sum of children heights + margins + borders
                 Layout::Vertical => {
                     for (index, child) in children.iter().zip(div.children.iter()) {
-                        height += nodes[*index].height + child.margin.top + child.margin.bottom;
+                        height += nodes[*index].height
+                            + child.margin.top
+                            + child.margin.bottom
+                            + child.border.top
+                            + child.border.bottom;
                     }
                 }
-                // Horizontal layout: height is max of children heights + margins
+                // Horizontal layout: height is max of children heights + margins + borders
                 Layout::Horizontal => {
                     for (index, child) in children.iter().zip(div.children.iter()) {
-                        height = height
-                            .max(nodes[*index].height + child.margin.top + child.margin.bottom);
+                        height = height.max(
+                            nodes[*index].height
+                                + child.margin.top
+                                + child.margin.bottom
+                                + child.border.top
+                                + child.border.bottom,
+                        );
                     }
                 }
             }
