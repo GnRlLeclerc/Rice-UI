@@ -41,6 +41,9 @@ impl Arena {
         // 5th pass: compute grow heights (bottom-up)
         self.compute_grow_height(root_key, root);
 
+        // 6th pass: compute positions (top-down)
+        self.compute_positions(root_key, root);
+
         // Return root key
         root_key
     }
@@ -102,6 +105,15 @@ impl Arena {
     }
 
     // ********************************************************************* //
+    //                            6TH PASS: POSITIONS                        //
+    // ********************************************************************* //
+
+    // Recursive position computation pass.
+    fn compute_positions(&mut self, key: usize, div: &Div) {
+        recurse_positions(key, div, &mut self.nodes, &self.children);
+    }
+
+    // ********************************************************************* //
     //                            SLOTMAP UTILITIES                          //
     // ********************************************************************* //
 
@@ -157,7 +169,7 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
             let mut width = 0;
             match div.layout {
                 // Vertical layout: width is max of children widths + margins + borders
-                Layout::Vertical => {
+                Layout::Vertical(_) => {
                     for (index, child) in children.iter().zip(div.children.iter()) {
                         width = width.max(
                             nodes[*index].width
@@ -169,7 +181,7 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
                     }
                 }
                 // Horizontal layout: width is sum of children widths + margins + borders
-                Layout::Horizontal => {
+                Layout::Horizontal(_) => {
                     for (index, child) in children.iter().zip(div.children.iter()) {
                         width += nodes[*index].width
                             + child.margin.left
@@ -220,7 +232,7 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
             let mut height = 0;
             match div.layout {
                 // Vertical layout: height is sum of children heights + margins + borders
-                Layout::Vertical => {
+                Layout::Vertical(_) => {
                     for (index, child) in children.iter().zip(div.children.iter()) {
                         height += nodes[*index].height
                             + child.margin.top
@@ -230,7 +242,7 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
                     }
                 }
                 // Horizontal layout: height is max of children heights + margins + borders
-                Layout::Horizontal => {
+                Layout::Horizontal(_) => {
                     for (index, child) in children.iter().zip(div.children.iter()) {
                         height = height.max(
                             nodes[*index].height
@@ -250,5 +262,47 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
         }
         // If fixed size, nothing to be done
         _ => {}
+    }
+}
+
+/// Compute the position of the children of the current node.
+/// This is an auxiliary function for fine-grained borrowing.
+fn recurse_positions(node: usize, div: &Div, nodes: &mut [Rect], children: &[Vec<usize>]) {
+    let parent_x = &nodes[node].x + div.padding.left;
+    let parent_y = &nodes[node].y + div.padding.top;
+
+    match div.layout {
+        // Vertical layout: accumulate heights and restart widths from parent
+        Layout::Vertical(align) => {
+            let mut y = parent_y;
+            for (&index, child) in children[node].iter().zip(div.children.iter()) {
+                // Set child position
+                y += child.margin.top + child.border.top;
+                nodes[index].x = align.position_x(&nodes[node], &nodes[index], div, child);
+                nodes[index].y = y;
+
+                // Recurse child
+                recurse_positions(index, child, nodes, children);
+
+                // Update remaining position
+                y += nodes[index].height + child.margin.bottom + child.border.bottom;
+            }
+        }
+        // Horizontal layout: accumulate widths and restart height from parent
+        Layout::Horizontal(align) => {
+            let mut x = parent_x;
+            for (&index, child) in children[node].iter().zip(div.children.iter()) {
+                // Set child position
+                x += child.margin.left + child.border.left;
+                nodes[index].x = x;
+                nodes[index].y = align.position_y(&nodes[node], &nodes[index], div, child);
+
+                // Recurse child
+                recurse_positions(index, child, nodes, children);
+
+                // Update remaining position
+                x += nodes[index].width + child.margin.right + child.border.right;
+            }
+        }
     }
 }

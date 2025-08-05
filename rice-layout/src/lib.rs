@@ -1,3 +1,4 @@
+mod alignment;
 mod arena;
 mod div;
 mod insets;
@@ -5,6 +6,7 @@ mod layout;
 mod rect;
 mod size;
 
+pub use alignment::{AlignmentH, AlignmentV};
 pub use arena::Arena;
 pub use div::Div;
 pub use insets::Insets;
@@ -14,7 +16,7 @@ pub use size::Size;
 
 #[cfg(test)]
 mod tests {
-    use crate::{Insets, arena::Arena, div::Div, size::Size};
+    use crate::{AlignmentH, AlignmentV, Insets, arena::Arena, div::Div, size::Size};
 
     #[test]
     fn test_div() {
@@ -48,7 +50,7 @@ mod tests {
                 Div::new(Size::Fixed(50), Size::Fixed(100)),
                 Div::new(Size::Fixed(100), Size::Fixed(200)),
             ])
-            .vertical();
+            .vertical(AlignmentV::Left);
 
         let key = arena.compute(&div);
         let root = &arena.nodes[key];
@@ -67,7 +69,7 @@ mod tests {
                 Div::new(Size::Fixed(50), Size::Fixed(100)),
                 Div::new(Size::Fixed(100), Size::Fixed(200)),
             ])
-            .horizontal();
+            .horizontal(AlignmentH::Top);
 
         let key = arena.compute(&div);
         let root = &arena.nodes[key];
@@ -86,7 +88,7 @@ mod tests {
                 Div::new(Size::Fixed(50), Size::Fixed(100)),
                 Div::new(Size::Fixed(100), Size::Fixed(200)),
             ])
-            .vertical();
+            .vertical(AlignmentV::Left);
 
         let key = arena.compute(&div);
         let root = &arena.nodes[key];
@@ -105,7 +107,7 @@ mod tests {
                 Div::new(Size::Fixed(50), Size::Fixed(100)),
                 Div::new(Size::Fixed(100), Size::Fixed(200)),
             ])
-            .horizontal();
+            .horizontal(AlignmentH::Top);
 
         let key = arena.compute(&div);
         let root = &arena.nodes[key];
@@ -171,5 +173,37 @@ mod tests {
 
         assert_eq!(root.width, 54); // 50 + 1 + 3 = 54
         assert_eq!(root.height, 56); // 50 + 2 + 4 = 56
+    }
+
+    #[test]
+    fn test_align_vertical() {
+        let mut arena = Arena::new();
+        // Test centering without padding or margins
+        let div = Div::new(Size::Fixed(100), Size::Fixed(100))
+            .with_children(vec![Div::new(Size::Fixed(50), Size::Fixed(50))])
+            .vertical(AlignmentV::Center);
+
+        let key = arena.compute(&div);
+        let root = &arena.nodes[key];
+        assert_eq!(root.x, 0); // Parent position
+
+        let child = &arena.nodes[arena.children[key][0]];
+        assert_eq!(child.x, 25);
+    }
+
+    #[test]
+    fn test_align_horizontal() {
+        let mut arena = Arena::new();
+        // Test centering without padding or margins
+        let div = Div::new(Size::Fixed(100), Size::Fixed(100))
+            .with_children(vec![Div::new(Size::Fixed(50), Size::Fixed(50))])
+            .horizontal(AlignmentH::Center);
+
+        let key = arena.compute(&div);
+        let root = &arena.nodes[key];
+        assert_eq!(root.y, 0); // Parent position
+
+        let child = &arena.nodes[arena.children[key][0]];
+        assert_eq!(child.y, 25);
     }
 }
