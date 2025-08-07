@@ -3,8 +3,22 @@
 version = 4
 
 [[package]]
+name = "basic"
+version = "0.1.0"
+dependencies = [
+ "rice-ui",
+]
+
+[[package]]
 name = "rice-layout"
 version = "0.1.0"
+
+[[package]]
+name = "rice-ui"
+version = "0.1.0"
+dependencies = [
+ "rice-layout",
+]
 
 [[package]]
 name = "rice-wgpu"

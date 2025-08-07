@@ -6,7 +6,9 @@ Inspired by the [Clay](https://github.com/nicbarker/clay) UI layout library.
 
 ## Project Crates
 
+- [`examples`](./examples): usage examples
 - [`rice-layout`](./rice-layout): layout computation framework
+- [`rice-ui`](./rice-ui): main crate
 - [`rice-wgpu`](./rice-wgpu): WGPU rendering for Rice UI
 
 ## Roadmap
