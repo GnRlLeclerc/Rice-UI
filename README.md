@@ -18,7 +18,7 @@ Inspired by the [Clay](https://github.com/nicbarker/clay) UI layout library.
   - [ ] growable size components
   - [ ] text components (wrapping)
   - [x] alignment
-  - [x] margin, padding & borders
+  - [x] margin & padding
   - [ ] grid
 - [ ] WGPU rendering
   - [ ] basic rendering

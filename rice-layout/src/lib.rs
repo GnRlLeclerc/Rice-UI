@@ -159,25 +159,6 @@ mod tests {
     }
 
     #[test]
-    fn test_borders() {
-        let mut arena = Arena::new();
-        let div = Div::new(Size::Fit, Size::Fit).with_children(vec![
-            Div::new(Size::Fixed(50), Size::Fixed(50)).with_border(Insets {
-                left: 1,
-                top: 2,
-                right: 3,
-                bottom: 4,
-            }),
-        ]);
-
-        let key = arena.compute(&div);
-        let root = &arena.nodes[key];
-
-        assert_eq!(root.width, 54); // 50 + 1 + 3 = 54
-        assert_eq!(root.height, 56); // 50 + 2 + 4 = 56
-    }
-
-    #[test]
     fn test_align_vertical() {
         let mut arena = Arena::new();
         // Test centering without padding or margins

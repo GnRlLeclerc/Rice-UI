@@ -28,13 +28,8 @@ impl AlignmentV {
         child_div: &Div,
     ) -> i32 {
         match self {
-            // Stick to left: only parent padding & child margin + border
-            AlignmentV::Left => {
-                parent_rect.x
-                    + parent_div.padding.left
-                    + child_div.margin.left
-                    + child_div.border.left
-            }
+            // Stick to left: only parent padding & child margin
+            AlignmentV::Left => parent_rect.x + parent_div.padding.left + child_div.margin.left,
             // Center: center child according to its width + margin within parent padding
             AlignmentV::Center => {
                 parent_rect.x
@@ -44,17 +39,14 @@ impl AlignmentV {
                         - parent_div.padding.left
                         - child_rect.width
                         - child_div.margin.left
-                        - child_div.border.left
-                        - child_div.margin.right
-                        - child_div.border.right)
+                        - child_div.margin.right)
                         / 2
             }
-            // Stick to right: only parent padding & child margin + border
+            // Stick to right: only parent padding & child margin
             AlignmentV::Right => {
                 parent_rect.x + parent_rect.width
                     - parent_div.padding.right
                     - child_div.margin.right
-                    - child_div.border.right
                     - child_rect.width
             }
         }
@@ -71,10 +63,8 @@ impl AlignmentH {
         child_div: &Div,
     ) -> i32 {
         match self {
-            // Stick to top: only parent padding & child margin + border
-            AlignmentH::Top => {
-                parent_rect.y + parent_div.padding.top + child_div.margin.top + child_div.border.top
-            }
+            // Stick to top: only parent padding & child margin
+            AlignmentH::Top => parent_rect.y + parent_div.padding.top + child_div.margin.top,
             // Center: center child according to its height + margin within parent padding
             AlignmentH::Center => {
                 parent_rect.y
@@ -84,17 +74,14 @@ impl AlignmentH {
                         - parent_div.padding.top
                         - child_rect.height
                         - child_div.margin.top
-                        - child_div.border.top
-                        - child_div.margin.bottom
-                        - child_div.border.bottom)
+                        - child_div.margin.bottom)
                         / 2
             }
-            // Stick to bottom: only parent padding & child margin + border
+            // Stick to bottom: only parent padding & child margin
             AlignmentH::Bottom => {
                 parent_rect.y + parent_rect.height
                     - parent_div.padding.bottom
                     - child_div.margin.bottom
-                    - child_div.border.bottom
                     - child_rect.height
             }
         }
