@@ -35,25 +35,25 @@ impl Div {
     }
 
     /// Set the width of the div
-    pub fn with_width(mut self, width: Size) -> Self {
+    pub fn width(mut self, width: Size) -> Self {
         self.width = width;
         self
     }
 
     /// Set the height of the div
-    pub fn with_height(mut self, height: Size) -> Self {
+    pub fn height(mut self, height: Size) -> Self {
         self.height = height;
         self
     }
 
     /// Set the children of the div
-    pub fn with_children(mut self, children: Vec<Div>) -> Self {
+    pub fn children(mut self, children: Vec<Div>) -> Self {
         self.children = children;
         self
     }
 
     /// Set the layout of the div
-    pub fn with_layout(mut self, layout: Layout) -> Self {
+    pub fn layout(mut self, layout: Layout) -> Self {
         self.layout = layout;
         self
     }
@@ -71,19 +71,19 @@ impl Div {
     }
 
     /// Set the margin insets
-    pub fn with_margin(mut self, margin: Insets) -> Self {
+    pub fn margin(mut self, margin: Insets) -> Self {
         self.margin = margin;
         self
     }
 
     /// Set the padding insets
-    pub fn with_padding(mut self, padding: Insets) -> Self {
+    pub fn padding(mut self, padding: Insets) -> Self {
         self.padding = padding;
         self
     }
 
     /// Set the gap between children
-    pub fn with_gap(mut self, gap: Gap) -> Self {
+    pub fn gap(mut self, gap: Gap) -> Self {
         self.gap = gap;
         self
     }

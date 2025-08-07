@@ -30,7 +30,7 @@ mod tests {
     #[test]
     fn test_fixed_widths() {
         let mut arena = Arena::new();
-        let div = Div::new(Size::Fixed(100), Size::Fit).with_children(vec![
+        let div = Div::new(Size::Fixed(100), Size::Fit).children(vec![
             Div::new(Size::Fixed(50), Size::Fixed(100)),
             Div::new(Size::Fixed(100), Size::Fixed(200)),
         ]);
@@ -48,7 +48,7 @@ mod tests {
     fn test_fit_widths_vertical() {
         let mut arena = Arena::new();
         let div = Div::new(Size::Fit, Size::Fit)
-            .with_children(vec![
+            .children(vec![
                 Div::new(Size::Fixed(50), Size::Fixed(100)),
                 Div::new(Size::Fixed(100), Size::Fixed(200)),
             ])
@@ -67,7 +67,7 @@ mod tests {
     fn test_fit_widths_horizontal() {
         let mut arena = Arena::new();
         let div = Div::new(Size::Fit, Size::Fit)
-            .with_children(vec![
+            .children(vec![
                 Div::new(Size::Fixed(50), Size::Fixed(100)),
                 Div::new(Size::Fixed(100), Size::Fixed(200)),
             ])
@@ -86,7 +86,7 @@ mod tests {
     fn test_fit_heights_vertical() {
         let mut arena = Arena::new();
         let div = Div::new(Size::Fit, Size::Fit)
-            .with_children(vec![
+            .children(vec![
                 Div::new(Size::Fixed(50), Size::Fixed(100)),
                 Div::new(Size::Fixed(100), Size::Fixed(200)),
             ])
@@ -105,7 +105,7 @@ mod tests {
     fn test_fit_heights_horizontal() {
         let mut arena = Arena::new();
         let div = Div::new(Size::Fit, Size::Fit)
-            .with_children(vec![
+            .children(vec![
                 Div::new(Size::Fixed(50), Size::Fixed(100)),
                 Div::new(Size::Fixed(100), Size::Fixed(200)),
             ])
@@ -123,8 +123,8 @@ mod tests {
     #[test]
     fn test_margins() {
         let mut arena = Arena::new();
-        let div = Div::new(Size::Fit, Size::Fit).with_children(vec![
-            Div::new(Size::Fixed(50), Size::Fixed(50)).with_margin(Insets {
+        let div = Div::new(Size::Fit, Size::Fit).children(vec![
+            Div::new(Size::Fixed(50), Size::Fixed(50)).margin(Insets {
                 left: 1,
                 top: 2,
                 right: 3,
@@ -143,8 +143,8 @@ mod tests {
     fn test_padding() {
         let mut arena = Arena::new();
         let div = Div::new(Size::Fit, Size::Fit)
-            .with_children(vec![Div::new(Size::Fixed(50), Size::Fixed(50))])
-            .with_padding(Insets {
+            .children(vec![Div::new(Size::Fixed(50), Size::Fixed(50))])
+            .padding(Insets {
                 left: 1,
                 top: 2,
                 right: 3,
@@ -163,7 +163,7 @@ mod tests {
         let mut arena = Arena::new();
         // Test centering without padding or margins
         let div = Div::new(Size::Fixed(100), Size::Fixed(100))
-            .with_children(vec![Div::new(Size::Fixed(50), Size::Fixed(50))])
+            .children(vec![Div::new(Size::Fixed(50), Size::Fixed(50))])
             .vertical(AlignmentV::Center);
 
         let key = arena.compute(&div);
@@ -179,7 +179,7 @@ mod tests {
         let mut arena = Arena::new();
         // Test centering without padding or margins
         let div = Div::new(Size::Fixed(100), Size::Fixed(100))
-            .with_children(vec![Div::new(Size::Fixed(50), Size::Fixed(50))])
+            .children(vec![Div::new(Size::Fixed(50), Size::Fixed(50))])
             .horizontal(AlignmentH::Center);
 
         let key = arena.compute(&div);
