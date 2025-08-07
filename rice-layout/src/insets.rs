@@ -3,10 +3,10 @@
 /// Fixed pixel insets
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insets {
-    pub left: usize,
-    pub top: usize,
-    pub right: usize,
-    pub bottom: usize,
+    pub left: i32,
+    pub top: i32,
+    pub right: i32,
+    pub bottom: i32,
 }
 
 impl Default for Insets {
@@ -22,7 +22,7 @@ impl Default for Insets {
 
 impl Insets {
     /// Create vertical insets
-    pub fn vertical(top: usize, bottom: usize) -> Self {
+    pub fn vertical(top: i32, bottom: i32) -> Self {
         Insets {
             left: 0,
             top,
@@ -32,7 +32,7 @@ impl Insets {
     }
 
     /// Create horizontal insets
-    pub fn horizontal(left: usize, right: usize) -> Self {
+    pub fn horizontal(left: i32, right: i32) -> Self {
         Insets {
             left,
             top: 0,
@@ -42,7 +42,7 @@ impl Insets {
     }
 
     /// Create all insets with the same value
-    pub fn uniform(value: usize) -> Self {
+    pub fn uniform(value: i32) -> Self {
         Insets {
             left: value,
             top: value,

@@ -198,7 +198,7 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
             if let Gap::Fixed(gap) = div.gap
                 && let Layout::Horizontal(_) = div.layout
             {
-                width += gap * (children.len().saturating_sub(1));
+                width += gap * (children.len().saturating_sub(1)) as i32;
             }
 
             // Assign back to the current node
@@ -268,7 +268,7 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
             if let Gap::Fixed(gap) = div.gap
                 && let Layout::Vertical(_) = div.layout
             {
-                height += gap * (children.len().saturating_sub(1));
+                height += gap * (children.len().saturating_sub(1)) as i32;
             }
 
             // Assign back to the current node
@@ -288,7 +288,7 @@ fn recurse_positions(node: usize, div: &Div, nodes: &mut [Rect], children: &[Vec
     let remaining = div.layout.remaining_space(node, div, nodes, children);
     let gap = match div.gap {
         Gap::Fixed(g) => g,
-        Gap::Auto => remaining / div.children.len(),
+        Gap::Auto => remaining / div.children.len() as i32,
     };
 
     match div.layout {

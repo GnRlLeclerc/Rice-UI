@@ -24,7 +24,7 @@ impl Layout {
         div: &Div,
         nodes: &[Rect],
         children: &[Vec<usize>],
-    ) -> usize {
+    ) -> i32 {
         match self {
             Layout::Horizontal(_) => {
                 let mut remaining = nodes[node].width - div.padding.left - div.padding.right;

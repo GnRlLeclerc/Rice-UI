@@ -3,7 +3,7 @@
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Gap {
     /// Fixed pixel gap
-    Fixed(usize),
+    Fixed(i32),
     /// Same gap between all children to fill parent
     Auto,
 }

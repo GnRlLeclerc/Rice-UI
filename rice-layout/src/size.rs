@@ -3,7 +3,7 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Size {
     /// Fixed pixel size
-    Fixed(usize),
+    Fixed(i32),
     /// Fit content
     Fit,
 }

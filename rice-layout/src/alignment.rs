@@ -26,7 +26,7 @@ impl AlignmentV {
         child_rect: &Rect,
         parent_div: &Div,
         child_div: &Div,
-    ) -> usize {
+    ) -> i32 {
         match self {
             // Stick to left: only parent padding & child margin + border
             AlignmentV::Left => {
@@ -69,7 +69,7 @@ impl AlignmentH {
         child_rect: &Rect,
         parent_div: &Div,
         child_div: &Div,
-    ) -> usize {
+    ) -> i32 {
         match self {
             // Stick to top: only parent padding & child margin + border
             AlignmentH::Top => {
