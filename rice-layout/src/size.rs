@@ -10,6 +10,6 @@ pub enum Size {
 
 impl Default for Size {
     fn default() -> Self {
-        Size::Fixed(0)
+        Size::Fit
     }
 }

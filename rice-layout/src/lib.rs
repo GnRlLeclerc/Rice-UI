@@ -1,6 +1,7 @@
 mod alignment;
 mod arena;
 mod div;
+mod gap;
 mod insets;
 mod layout;
 mod rect;
@@ -9,6 +10,7 @@ mod size;
 pub use alignment::{AlignmentH, AlignmentV};
 pub use arena::Arena;
 pub use div::Div;
+pub use gap::Gap;
 pub use insets::Insets;
 pub use layout::Layout;
 pub use rect::Rect;

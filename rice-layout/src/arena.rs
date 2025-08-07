@@ -1,6 +1,6 @@
 //! Layout computation
 
-use crate::{div::Div, layout::Layout, rect::Rect, size::Size};
+use crate::{Gap, div::Div, layout::Layout, rect::Rect, size::Size};
 
 /// Rect arena for layout computation.
 /// We store rects and their children in different attributes
@@ -194,6 +194,13 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
             // Add parent padding
             width += div.padding.left + div.padding.right;
 
+            // Add gap to width if children are disposed horizontally
+            if let Gap::Fixed(gap) = div.gap
+                && let Layout::Horizontal(_) = div.layout
+            {
+                width += gap * (children.len().saturating_sub(1));
+            }
+
             // Assign back to the current node
             nodes[node].width = width;
         }
@@ -257,6 +264,13 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
             // Add parent padding
             height += div.padding.top + div.padding.bottom;
 
+            // Add gap to height if children are disposed vertically
+            if let Gap::Fixed(gap) = div.gap
+                && let Layout::Vertical(_) = div.layout
+            {
+                height += gap * (children.len().saturating_sub(1));
+            }
+
             // Assign back to the current node
             nodes[node].height = height;
         }
@@ -270,6 +284,12 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
 fn recurse_positions(node: usize, div: &Div, nodes: &mut [Rect], children: &[Vec<usize>]) {
     let parent_x = &nodes[node].x + div.padding.left;
     let parent_y = &nodes[node].y + div.padding.top;
+
+    let remaining = div.layout.remaining_space(node, div, nodes, children);
+    let gap = match div.gap {
+        Gap::Fixed(g) => g,
+        Gap::Auto => remaining / div.children.len(),
+    };
 
     match div.layout {
         // Vertical layout: accumulate heights and restart widths from parent
@@ -285,7 +305,7 @@ fn recurse_positions(node: usize, div: &Div, nodes: &mut [Rect], children: &[Vec
                 recurse_positions(index, child, nodes, children);
 
                 // Update remaining position
-                y += nodes[index].height + child.margin.bottom + child.border.bottom;
+                y += nodes[index].height + child.margin.bottom + child.border.bottom + gap;
             }
         }
         // Horizontal layout: accumulate widths and restart height from parent
@@ -301,7 +321,7 @@ fn recurse_positions(node: usize, div: &Div, nodes: &mut [Rect], children: &[Vec
                 recurse_positions(index, child, nodes, children);
 
                 // Update remaining position
-                x += nodes[index].width + child.margin.right + child.border.right;
+                x += nodes[index].width + child.margin.right + child.border.right + gap;
             }
         }
     }

@@ -1,8 +1,8 @@
 //! A simple div element
 
-use crate::{AlignmentH, AlignmentV, Insets, layout::Layout, size::Size};
+use crate::{AlignmentH, AlignmentV, Gap, Insets, layout::Layout, size::Size};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Div {
     /// Width constraint
     pub width: Size,
@@ -16,22 +16,10 @@ pub struct Div {
     pub border: Insets,
     /// Layout for the children
     pub layout: Layout,
+    /// Gap between children
+    pub gap: Gap,
     /// Children elements
     pub children: Vec<Div>,
-}
-
-impl Default for Div {
-    fn default() -> Self {
-        Div {
-            width: Size::Fit,
-            height: Size::Fit,
-            margin: Insets::default(),
-            padding: Insets::default(),
-            border: Insets::default(),
-            children: vec![],
-            layout: Layout::default(),
-        }
-    }
 }
 
 impl Div {
@@ -43,8 +31,9 @@ impl Div {
             margin: Insets::default(),
             padding: Insets::default(),
             border: Insets::default(),
-            children: vec![],
             layout: Layout::default(),
+            gap: Gap::default(),
+            children: vec![],
         }
     }
 
@@ -101,4 +90,11 @@ impl Div {
         self.border = border;
         self
     }
+
+    /// Set the gap between children
+    pub fn with_gap(mut self, gap: Gap) -> Self {
+        self.gap = gap;
+        self
+    }
+}
 }
