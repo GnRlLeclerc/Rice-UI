@@ -27,90 +27,42 @@ impl Arena {
 
     /// Compute the layout for a given root node
     pub fn compute(&mut self, root: &Div) -> usize {
+        // Initialize the arena with the root div
+        let root_key = self.initialize(root);
+
         // 1st pass: compute fixed widths (top-down)
-        let root_key = self.compute_fixed_width(root);
+        recurse_fixed_width(root_key, root, &mut self.nodes, &self.children);
 
         // 2nd pass: compute grow widths (bottom-up)
-        self.compute_grow_width(root_key, root);
+        recurse_grow_width(root_key, root, &mut self.nodes, &self.children);
 
         // 3rd pass: wrap text (todo)
 
         // 4th pass: compute fixed heights (top-down)
-        self.compute_fixed_height(root_key, root);
+        recurse_fixed_height(root_key, root, &mut self.nodes, &self.children);
 
         // 5th pass: compute grow heights (bottom-up)
-        self.compute_grow_height(root_key, root);
+        recurse_grow_height(root_key, root, &mut self.nodes, &self.children);
 
         // 6th pass: compute positions (top-down)
-        self.compute_positions(root_key, root);
+        recurse_positions(root_key, root, &mut self.nodes, &self.children);
 
         // Return root key
         root_key
     }
 
-    // ********************************************************************* //
-    //                          1ST PASS: FIXED WIDTHS                       //
-    // ********************************************************************* //
+    /// Initialize the arena to create corresponding rects for the given root div
+    fn initialize(&mut self, div: &Div) -> usize {
+        // Create a new rectangle for the root div
+        let key = self.insert(Rect::default(), div.children.len());
 
-    /// Recursive fixed width computation pass.
-    /// Because this is the first pass, it is responsible for creating nodes
-    fn compute_fixed_width(&mut self, div: &Div) -> usize {
-        // Create rect for the current div
-        let key = self.insert(
-            Rect {
-                x: 0,
-                y: 0,
-                width: match div.width {
-                    Size::Fixed(w) => w,
-                    Size::Fit => 0,
-                },
-                height: 0,
-            },
-            div.children.len(),
-        );
-
+        // Initialize children recursively
         for child in &div.children {
-            let child_key = self.compute_fixed_width(child);
+            let child_key = self.initialize(child);
             self.children[key].push(child_key);
         }
 
         key
-    }
-
-    // ********************************************************************* //
-    //                          2ND PASS: GROW WIDTHS                        //
-    // ********************************************************************* //
-
-    // Recursive grow width computation pass.
-    fn compute_grow_width(&mut self, key: usize, div: &Div) {
-        recurse_grow_width(key, div, &mut self.nodes, &self.children);
-    }
-
-    // ********************************************************************* //
-    //                         4TH PASS: FIXED HEIGHTS                       //
-    // ********************************************************************* //
-
-    // Recursive fixed height computation pass.
-    fn compute_fixed_height(&mut self, key: usize, div: &Div) {
-        recurse_fixed_height(key, div, &mut self.nodes, &self.children);
-    }
-
-    // ********************************************************************* //
-    //                          5TH PASS: GROW WIDTHS                        //
-    // ********************************************************************* //
-
-    // Recursive grow height computation pass.
-    fn compute_grow_height(&mut self, key: usize, div: &Div) {
-        recurse_grow_height(key, div, &mut self.nodes, &self.children);
-    }
-
-    // ********************************************************************* //
-    //                            6TH PASS: POSITIONS                        //
-    // ********************************************************************* //
-
-    // Recursive position computation pass.
-    fn compute_positions(&mut self, key: usize, div: &Div) {
-        recurse_positions(key, div, &mut self.nodes, &self.children);
     }
 
     // ********************************************************************* //
@@ -152,6 +104,29 @@ fn recurse_free(node: usize, free: &mut Vec<usize>, children: &[Vec<usize>]) {
     // Add the current node to the free list
     free.push(node);
 }
+
+// ************************************************************************* //
+//                            1ST PASS: FIXED WIDTHS                         //
+// ************************************************************************* //
+
+/// Recursively compute fixed widths in a top-down manner.
+/// Is an auxiliary function for fine-grained borrowing.
+fn recurse_fixed_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Vec<usize>]) {
+    // Set the width of the current node if it is fixed
+    nodes[node].width = match div.width {
+        Size::Fixed(w) => w,
+        Size::Fit => 0, // Will be computed later
+    };
+
+    // Recurse children sizes
+    for (index, child_div) in children[node].iter().zip(div.children.iter()) {
+        recurse_fixed_width(*index, child_div, nodes, children);
+    }
+}
+
+// ************************************************************************* //
+//                            2ND PASS: GROW WIDTHS                          //
+// ************************************************************************* //
 
 /// Recursively compute grow widths in a bottom-up manner.
 /// Is an auxiliary function for fine-grained borrowing.
@@ -200,6 +175,10 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
     }
 }
 
+// ************************************************************************* //
+//                           4TH PASS: FIXED HEIGHTS                         //
+// ************************************************************************* //
+
 /// Recursive fixed height computation pass.
 /// Is an auxiliary function for fine-grained borrowing.
 fn recurse_fixed_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[Vec<usize>]) {
@@ -213,6 +192,10 @@ fn recurse_fixed_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[
         recurse_fixed_height(*index, child_div, nodes, children);
     }
 }
+
+// ************************************************************************* //
+//                            5TH PASS: GROW WIDTHS                          //
+// ************************************************************************* //
 
 /// Compute the height of the current node based on its children.
 /// This is an auxiliary function for fine-grained borrowing.
@@ -260,6 +243,10 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
         _ => {}
     }
 }
+
+// ************************************************************************* //
+//                              6TH PASS: POSITIONS                          //
+// ************************************************************************* //
 
 /// Compute the position of the children of the current node.
 /// This is an auxiliary function for fine-grained borrowing.
