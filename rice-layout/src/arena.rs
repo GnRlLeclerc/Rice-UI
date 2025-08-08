@@ -188,7 +188,9 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
                 .iter()
                 .zip(div.children.iter())
                 .for_each(|(&index, child)| {
-                    nodes[index].width = available - child.margin.left - child.margin.right;
+                    if let Size::Expand(_) = child.width {
+                        nodes[index].width = available - child.margin.left - child.margin.right;
+                    }
                 });
         }
         // Horizontal layout: divide all available width among children
@@ -342,7 +344,9 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
                 .iter()
                 .zip(div.children.iter())
                 .for_each(|(&index, child)| {
-                    nodes[index].height = available - child.margin.top - child.margin.bottom;
+                    if let Size::Expand(_) = child.height {
+                        nodes[index].height = available - child.margin.top - child.margin.bottom;
+                    }
                 });
         }
     }
