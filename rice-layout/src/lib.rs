@@ -25,10 +25,9 @@ mod tests {
 
     #[test]
     fn test_fixed_sizes() {
-        let mut arena = Arena::new();
-
         for &width in SIZES {
             for &height in SIZES {
+                let mut arena = Arena::new();
                 let div = Div::new(Size::Fixed(width), Size::Fixed(height));
                 let key = arena.compute(&div);
                 let root = &arena.nodes[key];
@@ -40,10 +39,9 @@ mod tests {
 
     #[test]
     fn test_fit_children() {
-        let mut arena = Arena::new();
-
         for &width in SIZES {
             for &height in SIZES {
+                let mut arena = Arena::new();
                 let div = Div::new(Size::Fit, Size::Fit)
                     .children(vec![Div::new(Size::Fixed(width), Size::Fixed(height))]);
                 let key = arena.compute(&div);
@@ -56,11 +54,11 @@ mod tests {
 
     #[test]
     fn test_margins() {
-        let mut arena = Arena::new();
         for &margin_top in SIZES {
             for &margin_right in SIZES {
                 for &margin_left in SIZES {
                     for &margin_bottom in SIZES {
+                        let mut arena = Arena::new();
                         let div = Div::new(Size::Fit, Size::Fit).children(vec![
                             Div::new(Size::Fixed(100), Size::Fixed(100)).margin(Insets {
                                 left: margin_left,
@@ -81,11 +79,11 @@ mod tests {
 
     #[test]
     fn test_padding() {
-        let mut arena = Arena::new();
         for &padding_top in SIZES {
             for &padding_right in SIZES {
                 for &padding_left in SIZES {
                     for &padding_bottom in SIZES {
+                        let mut arena = Arena::new();
                         let div = Div::new(Size::Fit, Size::Fit)
                             .children(vec![Div::new(Size::Fixed(100), Size::Fixed(100))])
                             .padding(Insets {
@@ -106,12 +104,11 @@ mod tests {
 
     #[test]
     fn test_fit_vertical() {
-        let mut arena = Arena::new();
-
         for &width1 in SIZES {
             for &width2 in SIZES {
                 for &height1 in SIZES {
                     for &height2 in SIZES {
+                        let mut arena = Arena::new();
                         let div = Div::new(Size::Fit, Size::Fit)
                             .children(vec![
                                 Div::new(Size::Fixed(width1), Size::Fixed(height1)),
@@ -131,12 +128,11 @@ mod tests {
 
     #[test]
     fn test_fit_horizontal() {
-        let mut arena = Arena::new();
-
         for &width1 in SIZES {
             for &width2 in SIZES {
                 for &height1 in SIZES {
                     for &height2 in SIZES {
+                        let mut arena = Arena::new();
                         let div = Div::new(Size::Fit, Size::Fit)
                             .children(vec![
                                 Div::new(Size::Fixed(width1), Size::Fixed(height1)),
@@ -317,5 +313,76 @@ mod tests {
         }
     }
 
-    // TODO : also test gap when parent is fixed size
+    #[test]
+    fn test_auto_gap() {
+        // Gap in vertical layout
+        for &padding in SIZES {
+            for &margin in SIZES {
+                for &height1 in SIZES {
+                    for &height2 in SIZES {
+                        let mut arena = Arena::new();
+
+                        let div = Div::default()
+                            .height(Size::Fixed(1_600))
+                            .padding(Insets::uniform(padding))
+                            .children(vec![
+                                Div::new(Size::Fit, Size::Fixed(height1))
+                                    .margin(Insets::uniform(margin)),
+                                Div::new(Size::Fit, Size::Fixed(height2))
+                                    .margin(Insets::uniform(margin)),
+                            ])
+                            .gap(Gap::Auto)
+                            .vertical(AlignmentV::Left);
+
+                        let key = arena.compute(&div);
+                        let child2 = &arena.nodes[arena.children[key][1]];
+
+                        assert_eq!(
+                            child2.y,
+                            padding
+                                + margin
+                                + height1
+                                + margin
+                                + (1_600 - 2 * padding - 2 * margin - height1 - height2) / 2
+                        );
+                    }
+                }
+            }
+        }
+
+        // Gap in horizontal layout
+        for &padding in SIZES {
+            for &margin in SIZES {
+                for &width1 in SIZES {
+                    for &width2 in SIZES {
+                        let mut arena = Arena::new();
+
+                        let div = Div::default()
+                            .width(Size::Fixed(1_600))
+                            .padding(Insets::uniform(padding))
+                            .children(vec![
+                                Div::new(Size::Fixed(width1), Size::Fit)
+                                    .margin(Insets::uniform(margin)),
+                                Div::new(Size::Fixed(width2), Size::Fit)
+                                    .margin(Insets::uniform(margin)),
+                            ])
+                            .gap(Gap::Auto)
+                            .horizontal(AlignmentH::Top);
+
+                        let key = arena.compute(&div);
+                        let child2 = &arena.nodes[arena.children[key][1]];
+
+                        assert_eq!(
+                            child2.x,
+                            padding
+                                + margin
+                                + width1
+                                + margin
+                                + (1_600 - 2 * padding - 2 * margin - width1 - width2) / 2
+                        );
+                    }
+                }
+            }
+        }
+    }
 }
