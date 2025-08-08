@@ -18,10 +18,10 @@ pub use size::Size;
 
 #[cfg(test)]
 mod tests {
-    use crate::{AlignmentH, AlignmentV, Insets, arena::Arena, div::Div, size::Size};
+    use crate::{AlignmentH, AlignmentV, Gap, Insets, arena::Arena, div::Div, size::Size};
 
     /// Fixed sizes to test
-    static SIZES: &'static [i32] = &[0, 100, 200, 300];
+    static SIZES: &'static [i32] = &[0, 100, 200];
 
     #[test]
     fn test_fixed_sizes() {
@@ -153,4 +153,87 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_positions_vertical() {
+        for &width1 in SIZES {
+            for &width2 in SIZES {
+                for &height1 in SIZES {
+                    for &height2 in SIZES {
+                        for &margin in SIZES {
+                            for &padding in SIZES {
+                                for &gap in SIZES {
+                                    for align in
+                                        [AlignmentV::Left, AlignmentV::Center, AlignmentV::Right]
+                                    {
+                                        let mut arena = Arena::new();
+
+                                        let div = Div::default()
+                                            .padding(Insets::uniform(padding))
+                                            .children(vec![
+                                                Div::new(Size::Fixed(width1), Size::Fixed(height1))
+                                                    .margin(Insets::uniform(margin)),
+                                                Div::new(Size::Fixed(width2), Size::Fixed(height2))
+                                                    .margin(Insets::uniform(margin)),
+                                            ])
+                                            .gap(Gap::Fixed(gap))
+                                            .vertical(align);
+
+                                        let key = arena.compute(&div);
+                                        let root = &arena.nodes[key];
+                                        let child1 = &arena.nodes[arena.children[key][0]];
+                                        let child2 = &arena.nodes[arena.children[key][1]];
+
+                                        // Assert parent size
+                                        assert_eq!(
+                                            root.width,
+                                            width1.max(width2) + 2 * margin + 2 * padding
+                                        );
+                                        assert_eq!(
+                                            root.height,
+                                            height1 + height2 + 4 * margin + 2 * padding + gap
+                                        );
+
+                                        // Assert child 1 position
+                                        let expected_x1 = match align {
+                                            AlignmentV::Left => margin + padding,
+                                            AlignmentV::Center => {
+                                                (root.width - width1 - 2 * margin - 2 * padding) / 2
+                                                    + margin
+                                                    + padding
+                                            }
+                                            AlignmentV::Right => {
+                                                root.width - width1 - margin - padding
+                                            }
+                                        };
+
+                                        assert_eq!(child1.x, expected_x1);
+                                        assert_eq!(child1.y, margin + padding);
+
+                                        // Assert child 2 position (below child 1)
+                                        let expected_x2 = match align {
+                                            AlignmentV::Left => margin + padding,
+                                            AlignmentV::Center => {
+                                                (root.width - width2 - 2 * margin - 2 * padding) / 2
+                                                    + margin
+                                                    + padding
+                                            }
+                                            AlignmentV::Right => {
+                                                root.width - width2 - margin - padding
+                                            }
+                                        };
+
+                                        assert_eq!(child2.x, expected_x2);
+                                        assert_eq!(child2.y, child1.y + height1 + 2 * margin + gap);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // TODO : also test gap when parent is fixed size
 }

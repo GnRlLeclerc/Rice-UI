@@ -34,6 +34,7 @@ impl AlignmentV {
             AlignmentV::Center => {
                 parent_rect.x
                     + parent_div.padding.left
+                    + child_div.margin.left
                     + (parent_rect.width
                         - parent_div.padding.right
                         - parent_div.padding.left
@@ -69,6 +70,7 @@ impl AlignmentH {
             AlignmentH::Center => {
                 parent_rect.y
                     + parent_div.padding.top
+                    + child_div.margin.top
                     + (parent_rect.height
                         - parent_div.padding.bottom
                         - parent_div.padding.top
