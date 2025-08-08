@@ -235,5 +235,87 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_positions_horizontal() {
+        for &width1 in SIZES {
+            for &width2 in SIZES {
+                for &height1 in SIZES {
+                    for &height2 in SIZES {
+                        for &margin in SIZES {
+                            for &padding in SIZES {
+                                for &gap in SIZES {
+                                    for align in
+                                        [AlignmentH::Top, AlignmentH::Center, AlignmentH::Bottom]
+                                    {
+                                        let mut arena = Arena::new();
+
+                                        let div = Div::default()
+                                            .padding(Insets::uniform(padding))
+                                            .children(vec![
+                                                Div::new(Size::Fixed(width1), Size::Fixed(height1))
+                                                    .margin(Insets::uniform(margin)),
+                                                Div::new(Size::Fixed(width2), Size::Fixed(height2))
+                                                    .margin(Insets::uniform(margin)),
+                                            ])
+                                            .gap(Gap::Fixed(gap))
+                                            .horizontal(align);
+
+                                        let key = arena.compute(&div);
+                                        let root = &arena.nodes[key];
+                                        let child1 = &arena.nodes[arena.children[key][0]];
+                                        let child2 = &arena.nodes[arena.children[key][1]];
+
+                                        // Assert parent size
+                                        assert_eq!(
+                                            root.width,
+                                            width1 + width2 + 4 * margin + 2 * padding + gap
+                                        );
+                                        assert_eq!(
+                                            root.height,
+                                            height1.max(height2) + 2 * margin + 2 * padding
+                                        );
+
+                                        // Assert child 1 position
+                                        let expected_y1 = match align {
+                                            AlignmentH::Top => margin + padding,
+                                            AlignmentH::Center => {
+                                                (root.height - height1 - 2 * margin - 2 * padding)
+                                                    / 2
+                                                    + margin
+                                                    + padding
+                                            }
+                                            AlignmentH::Bottom => {
+                                                root.height - height1 - margin - padding
+                                            }
+                                        };
+
+                                        assert_eq!(child1.x, margin + padding);
+                                        assert_eq!(child1.y, expected_y1);
+
+                                        // Assert child 2 position (to the right of child 1)
+                                        let expected_y2 = match align {
+                                            AlignmentH::Top => margin + padding,
+                                            AlignmentH::Center => {
+                                                (root.height - height2 - 2 * margin - 2 * padding)
+                                                    / 2
+                                                    + margin
+                                                    + padding
+                                            }
+                                            AlignmentH::Bottom => {
+                                                root.height - height2 - margin - padding
+                                            }
+                                        };
+                                        assert_eq!(child2.x, child1.x + width1 + 2 * margin + gap);
+                                        assert_eq!(child2.y, expected_y2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // TODO : also test gap when parent is fixed size
 }
