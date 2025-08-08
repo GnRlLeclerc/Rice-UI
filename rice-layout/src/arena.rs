@@ -115,7 +115,7 @@ fn recurse_fixed_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
     // Set the width of the current node if it is fixed
     nodes[node].width = match div.width {
         Size::Fixed(w) => w,
-        Size::Fit => 0, // Will be computed later
+        Size::Fit | Size::Expand(_) => 0, // Will be computed later
     };
 
     // Recurse children sizes
@@ -173,6 +173,58 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
         // If fixed size, nothing to be done
         _ => {}
     }
+
+    if children.is_empty() {
+        return;
+    }
+
+    // Compute leftover space
+    let mut available = nodes[node].width - div.padding.left - div.padding.right;
+
+    match div.layout {
+        // Vertical layout: expand all children to fit all available width
+        Layout::Vertical(_) => {
+            children
+                .iter()
+                .zip(div.children.iter())
+                .for_each(|(&index, child)| {
+                    nodes[index].width = available - child.margin.left - child.margin.right;
+                });
+        }
+        // Horizontal layout: divide all available width among children
+        Layout::Horizontal(_) => {
+            children
+                .iter()
+                .zip(div.children.iter())
+                .for_each(|(&index, child)| {
+                    available -= nodes[index].width + child.margin.left + child.margin.right;
+                });
+            if let Gap::Fixed(gap) = div.gap {
+                available -= gap * (children.len().saturating_sub(1)) as i32;
+            }
+
+            let mut total_fr = 0.0;
+            let expandables: Vec<(usize, f32)> = children
+                .iter()
+                .zip(div.children.iter())
+                .filter_map(|(index, div)| match div.width {
+                    Size::Expand(fr) => {
+                        total_fr += fr;
+                        Some((*index, fr))
+                    }
+                    _ => None,
+                })
+                .collect();
+
+            // Distribute remaining space to all expandables
+            if total_fr == 0.0 {
+                total_fr = 1.0; // Avoid division by zero
+            }
+            for (index, fr) in expandables {
+                nodes[index].width = (available as f32 * fr / total_fr).round() as i32;
+            }
+        }
+    }
 }
 
 // ************************************************************************* //
@@ -184,7 +236,7 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
 fn recurse_fixed_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[Vec<usize>]) {
     nodes[node].height = match div.height {
         Size::Fixed(h) => h,
-        Size::Fit => 0, // Will be computed later
+        Size::Fit | Size::Expand(_) => 0, // Will be computed later
     };
 
     // Recurse children sizes
@@ -241,6 +293,58 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
         }
         // If fixed size, nothing to be done
         _ => {}
+    }
+
+    if children.is_empty() {
+        return;
+    }
+
+    // Compute leftover space
+    let mut available = nodes[node].height - div.padding.top - div.padding.bottom;
+
+    match div.layout {
+        // Vertical layout: divide all available width among children
+        Layout::Vertical(_) => {
+            children
+                .iter()
+                .zip(div.children.iter())
+                .for_each(|(&index, child)| {
+                    available -= nodes[index].height + child.margin.top + child.margin.bottom;
+                });
+            if let Gap::Fixed(gap) = div.gap {
+                available -= gap * (children.len().saturating_sub(1)) as i32;
+            }
+
+            let mut total_fr = 0.0;
+            let expandables: Vec<(usize, f32)> = children
+                .iter()
+                .zip(div.children.iter())
+                .filter_map(|(index, div)| match div.height {
+                    Size::Expand(fr) => {
+                        total_fr += fr;
+                        Some((*index, fr))
+                    }
+                    _ => None,
+                })
+                .collect();
+
+            // Distribute remaining space to all expandables
+            if total_fr == 0.0 {
+                total_fr = 1.0; // Avoid division by zero
+            }
+            for (index, fr) in expandables {
+                nodes[index].height = (available as f32 * fr / total_fr).round() as i32;
+            }
+        }
+        // Horizontal layout: expand all children to fit all available height
+        Layout::Horizontal(_) => {
+            children
+                .iter()
+                .zip(div.children.iter())
+                .for_each(|(&index, child)| {
+                    nodes[index].height = available - child.margin.top - child.margin.bottom;
+                });
+        }
     }
 }
 

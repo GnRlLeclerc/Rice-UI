@@ -23,6 +23,9 @@ mod tests {
     /// Fixed sizes to test
     static SIZES: &'static [i32] = &[0, 100, 200];
 
+    /// Fixed expandable fractions to test
+    static FR: &'static [f32] = &[0.0, 0.5, 1.0];
+
     #[test]
     fn test_fixed_sizes() {
         for &width in SIZES {
@@ -380,6 +383,83 @@ mod tests {
                                 + margin
                                 + (1_600 - 2 * padding - 2 * margin - width1 - width2) / 2
                         );
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_expandable() {
+        // Test expansion in vertical layout
+        for &margin in SIZES {
+            for &padding in SIZES {
+                for &gap in SIZES {
+                    for &fr1 in FR {
+                        for &fr2 in FR {
+                            let mut arena = Arena::new();
+                            let div = Div::new(Size::Fixed(1_600), Size::Fixed(1_600))
+                                .children(vec![
+                                    Div::new(Size::Expand(fr1), Size::Expand(fr1))
+                                        .margin(Insets::uniform(margin)),
+                                    Div::new(Size::Expand(fr2), Size::Expand(fr2))
+                                        .margin(Insets::uniform(margin)),
+                                ])
+                                .padding(Insets::uniform(padding))
+                                .vertical(AlignmentV::Left)
+                                .gap(Gap::Fixed(gap));
+
+                            let key = arena.compute(&div);
+
+                            let available = (1_600 - 4 * margin - 2 * padding - gap) as f32;
+                            let total_fr = fr1 + fr2;
+
+                            let child1 = &arena.nodes[arena.children[key][0]];
+                            let child2 = &arena.nodes[arena.children[key][1]];
+
+                            assert_eq!(child1.width, 1_600 - 2 * margin - 2 * padding);
+                            assert_eq!(child2.width, 1_600 - 2 * margin - 2 * padding);
+
+                            assert_eq!(child1.height, (available * fr1 / total_fr).round() as i32);
+                            assert_eq!(child2.height, (available * fr2 / total_fr).round() as i32);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Test expansion in horizontal layout
+        for &margin in SIZES {
+            for &padding in SIZES {
+                for &gap in SIZES {
+                    for &fr1 in FR {
+                        for &fr2 in FR {
+                            let mut arena = Arena::new();
+                            let div = Div::new(Size::Fixed(1_600), Size::Fixed(1_600))
+                                .children(vec![
+                                    Div::new(Size::Expand(fr1), Size::Expand(fr1))
+                                        .margin(Insets::uniform(margin)),
+                                    Div::new(Size::Expand(fr2), Size::Expand(fr2))
+                                        .margin(Insets::uniform(margin)),
+                                ])
+                                .padding(Insets::uniform(padding))
+                                .horizontal(AlignmentH::Top)
+                                .gap(Gap::Fixed(gap));
+
+                            let key = arena.compute(&div);
+
+                            let available = (1_600 - 4 * margin - 2 * padding - gap) as f32;
+                            let total_fr = fr1 + fr2;
+
+                            let child1 = &arena.nodes[arena.children[key][0]];
+                            let child2 = &arena.nodes[arena.children[key][1]];
+
+                            assert_eq!(child1.height, 1_600 - 2 * margin - 2 * padding);
+                            assert_eq!(child2.height, 1_600 - 2 * margin - 2 * padding);
+
+                            assert_eq!(child1.width, (available * fr1 / total_fr).round() as i32);
+                            assert_eq!(child2.width, (available * fr2 / total_fr).round() as i32);
+                        }
                     }
                 }
             }
