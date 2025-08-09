@@ -3,16 +3,18 @@
 use crate::{Div, Rect};
 
 /// Alignment for horizontal layouts
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 pub enum AlignmentH {
+    #[default]
     Top,
     Center,
     Bottom,
 }
 
 /// Alignment for vertical layouts
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 pub enum AlignmentV {
+    #[default]
     Left,
     Center,
     Right,

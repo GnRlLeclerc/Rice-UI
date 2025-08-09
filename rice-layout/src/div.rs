@@ -6,8 +6,16 @@ use crate::{AlignmentH, AlignmentV, Gap, Insets, layout::Layout, size::Size};
 pub struct Div {
     /// Width constraint
     pub width: Size,
+    /// Optional minimum width
+    pub min_width: Option<i32>,
+    /// Optional maximum width
+    pub max_width: Option<i32>,
     /// Height constraint
     pub height: Size,
+    /// Optional minimum height
+    pub min_height: Option<i32>,
+    /// Optional maximum height
+    pub max_height: Option<i32>,
     /// Margin insets
     pub margin: Insets,
     /// Padding insets
@@ -25,7 +33,11 @@ impl Div {
     pub fn new(width: Size, height: Size) -> Self {
         Div {
             width,
+            min_width: None,
+            max_width: None,
             height,
+            min_height: None,
+            max_height: None,
             margin: Insets::default(),
             padding: Insets::default(),
             layout: Layout::default(),
@@ -87,5 +99,54 @@ impl Div {
         self.gap = gap;
         self
     }
+
+    /// Set the minimum width
+    pub fn min_width(mut self, min_width: i32) -> Self {
+        self.min_width = Some(min_width);
+        self
+    }
+
+    /// Set the maximum width
+    pub fn max_width(mut self, max_width: i32) -> Self {
+        self.max_width = Some(max_width);
+        self
+    }
+
+    /// Set the minimum height
+    pub fn min_height(mut self, min_height: i32) -> Self {
+        self.min_height = Some(min_height);
+        self
+    }
+
+    /// Set the maximum height
+    pub fn max_height(mut self, max_height: i32) -> Self {
+        self.max_height = Some(max_height);
+        self
+    }
+
+    // ************************************************* //
+    //                     UTILITIES                     //
+    // ************************************************* //
+
+    pub(crate) fn clip_height(&self, height: i32) -> i32 {
+        if let Some(max_height) = self.max_height {
+            height.min(max_height)
+        } else if let Some(min_height) = self.min_height {
+            height.max(min_height)
+        } else {
+            height
+        }
+    }
+
+    pub(crate) fn clip_width(&self, width: i32) -> i32 {
+        if let Some(max_width) = self.max_width {
+            width.min(max_width)
+        } else if let Some(min_width) = self.min_width {
+            width.max(min_width)
+        } else {
+            width
+        }
+    }
+}
 }
 }

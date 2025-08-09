@@ -465,4 +465,135 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_minmax_widths() {
+        // In a vertical layout
+        let mut arena = Arena::new();
+        let div = Div::default()
+            .width(Size::Fixed(1000))
+            .children(vec![Div::default().width(Size::Expand(1.0)).max_width(500)]);
+        let key = arena.compute(&div);
+        let child = &arena.nodes[arena.children[key][0]];
+        assert_eq!(child.width, 500); // Should respect max_width
+
+        let div = Div::default()
+            .width(Size::Fit)
+            .children(vec![Div::default().width(Size::Expand(1.0)).min_width(500)]);
+        let key = arena.compute(&div);
+        let child = &arena.nodes[arena.children[key][0]];
+        assert_eq!(child.width, 500); // Should respect min_width
+
+        let div = Div::default().width(Size::Fixed(500)).children(vec![
+            Div::default()
+                .width(Size::Expand(1.0))
+                .min_width(0)
+                .max_width(1000),
+        ]);
+        let key = arena.compute(&div);
+        let child = &arena.nodes[arena.children[key][0]];
+        assert_eq!(child.width, 500); // Should respect parent's fixed width
+
+        // In a horizontal layout
+        let div = Div::default()
+            .width(Size::Fixed(1000))
+            .horizontal(AlignmentH::default())
+            .children(vec![
+                Div::default().width(Size::Expand(2.0)).max_width(400),
+                Div::default().width(Size::Expand(1.0)),
+            ]);
+        let key = arena.compute(&div);
+        let children = &arena.children[key];
+        let child1 = &arena.nodes[children[0]];
+        let child2 = &arena.nodes[children[1]];
+
+        assert_eq!(child1.width, 400); // Should respect max_width
+        assert_eq!(child2.width, 600); // Remaining space after child1
+
+        let div = Div::default()
+            .width(Size::Fixed(1000))
+            .horizontal(AlignmentH::default())
+            .children(vec![
+                Div::default().width(Size::Expand(2.0)),
+                Div::default().width(Size::Expand(1.0)).min_width(500),
+            ]);
+
+        let key = arena.compute(&div);
+        let children = &arena.children[key];
+        let child1 = &arena.nodes[children[0]];
+        let child2 = &arena.nodes[children[1]];
+
+        assert_eq!(child1.width, 500); // Should respect min_width
+        assert_eq!(child2.width, 500); // Should take remaining space
+    }
+
+    #[test]
+    fn test_minmax_heights() {
+        // In a horizontal layout
+        let mut arena = Arena::new();
+        let div = Div::default()
+            .height(Size::Fixed(1000))
+            .children(vec![
+                Div::default().height(Size::Expand(1.0)).max_height(500),
+            ])
+            .horizontal(AlignmentH::default());
+        let key = arena.compute(&div);
+        let child = &arena.nodes[arena.children[key][0]];
+        assert_eq!(child.height, 500); // Should respect max_height
+
+        let div = Div::default()
+            .height(Size::Fit)
+            .children(vec![
+                Div::default().height(Size::Expand(1.0)).min_height(500),
+            ])
+            .horizontal(AlignmentH::default());
+        let key = arena.compute(&div);
+        let child = &arena.nodes[arena.children[key][0]];
+        assert_eq!(child.height, 500); // Should respect min_height
+
+        let div = Div::default()
+            .height(Size::Fixed(500))
+            .children(vec![
+                Div::default()
+                    .height(Size::Expand(1.0))
+                    .min_height(0)
+                    .max_height(1000),
+            ])
+            .horizontal(AlignmentH::default());
+        let key = arena.compute(&div);
+        let child = &arena.nodes[arena.children[key][0]];
+        assert_eq!(child.height, 500); // Should respect parent's fixed height
+
+        // In a vertical layout
+        let div = Div::default()
+            .height(Size::Fixed(1000))
+            .vertical(AlignmentV::default())
+            .children(vec![
+                Div::default().height(Size::Expand(2.0)).max_height(400),
+                Div::default().height(Size::Expand(1.0)),
+            ]);
+        let key = arena.compute(&div);
+        let children = &arena.children[key];
+        let child1 = &arena.nodes[children[0]];
+        let child2 = &arena.nodes[children[1]];
+
+        assert_eq!(child1.height, 400); // Should respect max_height
+        assert_eq!(child2.height, 600); // Remaining space after child1
+
+        let div = Div::default()
+            .height(Size::Fixed(1000))
+            .vertical(AlignmentV::default())
+            .children(vec![
+                Div::default().height(Size::Expand(2.0)),
+                Div::default().height(Size::Expand(1.0)).min_height(500),
+            ]);
+
+        let key = arena.compute(&div);
+        let children = &arena.children[key];
+        let child1 = &arena.nodes[children[0]];
+        let child2 = &arena.nodes[children[1]];
+
+        assert_eq!(child1.height, 500); // Should respect min_height
+        assert_eq!(child2.height, 500); // Should take remaining space
+    }
 }

@@ -168,7 +168,7 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
             }
 
             // Assign back to the current node
-            nodes[node].width = width;
+            nodes[node].width = div.clip_width(width);
         }
         // If fixed size, nothing to be done
         _ => {}
@@ -189,7 +189,8 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
                 .zip(div.children.iter())
                 .for_each(|(&index, child)| {
                     if let Size::Expand(_) = child.width {
-                        nodes[index].width = available - child.margin.left - child.margin.right;
+                        nodes[index].width =
+                            child.clip_width(available - child.margin.left - child.margin.right);
                     }
                 });
         }
@@ -205,25 +206,47 @@ fn recurse_grow_width(node: usize, div: &Div, nodes: &mut [Rect], children: &[Ve
                 available -= gap * (children.len().saturating_sub(1)) as i32;
             }
 
-            let mut total_fr = 0.0;
-            let expandables: Vec<(usize, f32)> = children
+            let mut expandables: Vec<(usize, &Div, f32)> = children
                 .iter()
                 .zip(div.children.iter())
                 .filter_map(|(index, div)| match div.width {
                     Size::Expand(fr) => {
-                        total_fr += fr;
-                        Some((*index, fr))
+                        // Reset width to 0 (previously set to min width for fit computation)
+                        nodes[*index].width = 0;
+                        Some((*index, div, fr))
                     }
                     _ => None,
                 })
                 .collect();
 
-            // Distribute remaining space to all expandables
-            if total_fr == 0.0 {
-                total_fr = 1.0; // Avoid division by zero
-            }
-            for (index, fr) in expandables {
-                nodes[index].width = (available as f32 * fr / total_fr).round() as i32;
+            while available != 0 && !expandables.is_empty() {
+                // 1. Compute total fr of all expandables
+                let total_fr: f32 = expandables.iter().map(|(_, _, fr)| *fr).sum();
+                if total_fr == 0.0 {
+                    break;
+                }
+
+                // 2. Distribute remaining space to all expandables
+                for (index, _, fr) in &expandables {
+                    nodes[*index].width += (available as f32 * fr / total_fr).round() as i32;
+                }
+                available = 0;
+
+                // 3. Clip widths and put the extra space back to available
+                let mut i = 0;
+                while i < expandables.len() {
+                    let (index, div, _) = &expandables[i];
+                    let width = div.clip_width(nodes[*index].width);
+                    let delta = nodes[*index].width - width;
+                    if delta != 0 {
+                        // Width was clipped, remove this element from the list
+                        available += delta;
+                        nodes[*index].width = width;
+                        expandables.swap_remove(i);
+                    } else {
+                        i += 1;
+                    }
+                }
             }
         }
     }
@@ -291,7 +314,7 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
             }
 
             // Assign back to the current node
-            nodes[node].height = height;
+            nodes[node].height = div.clip_height(height);
         }
         // If fixed size, nothing to be done
         _ => {}
@@ -317,25 +340,47 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
                 available -= gap * (children.len().saturating_sub(1)) as i32;
             }
 
-            let mut total_fr = 0.0;
-            let expandables: Vec<(usize, f32)> = children
+            let mut expandables: Vec<(usize, &Div, f32)> = children
                 .iter()
                 .zip(div.children.iter())
                 .filter_map(|(index, div)| match div.height {
                     Size::Expand(fr) => {
-                        total_fr += fr;
-                        Some((*index, fr))
+                        // Reset height to 0 (previously set to min height for fit computation)
+                        nodes[*index].height = 0;
+                        Some((*index, div, fr))
                     }
                     _ => None,
                 })
                 .collect();
 
-            // Distribute remaining space to all expandables
-            if total_fr == 0.0 {
-                total_fr = 1.0; // Avoid division by zero
-            }
-            for (index, fr) in expandables {
-                nodes[index].height = (available as f32 * fr / total_fr).round() as i32;
+            while available != 0 && !expandables.is_empty() {
+                // 1. Compute total fr of all expandables
+                let total_fr: f32 = expandables.iter().map(|(_, _, fr)| *fr).sum();
+                if total_fr == 0.0 {
+                    break;
+                }
+
+                // 2. Distribute remaining space to all expandables
+                for (index, _, fr) in &expandables {
+                    nodes[*index].height += (available as f32 * fr / total_fr).round() as i32;
+                }
+                available = 0;
+
+                // 3. Clip heights and put the extra space back to available
+                let mut i = 0;
+                while i < expandables.len() {
+                    let (index, div, _) = &expandables[i];
+                    let height = div.clip_height(nodes[*index].height);
+                    let delta = nodes[*index].height - height;
+                    if delta != 0 {
+                        // Height was clipped, remove this element from the list
+                        available += delta;
+                        nodes[*index].height = height;
+                        expandables.swap_remove(i);
+                    } else {
+                        i += 1;
+                    }
+                }
             }
         }
         // Horizontal layout: expand all children to fit all available height
@@ -345,7 +390,8 @@ fn recurse_grow_height(node: usize, div: &Div, nodes: &mut [Rect], children: &[V
                 .zip(div.children.iter())
                 .for_each(|(&index, child)| {
                     if let Size::Expand(_) = child.height {
-                        nodes[index].height = available - child.margin.top - child.margin.bottom;
+                        nodes[index].height =
+                            child.clip_height(available - child.margin.top - child.margin.bottom);
                     }
                 });
         }
