@@ -18,6 +18,7 @@ name = "rice-ui"
 version = "0.1.0"
 dependencies = [
  "rice-layout",
+ "rice-wgpu",
 ]
 
 [[package]]

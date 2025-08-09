@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 rice-layout = { path = "../rice-layout" }
+rice-wgpu = { path = "../rice-wgpu" }
