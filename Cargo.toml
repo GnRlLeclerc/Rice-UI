@@ -1,3 +1,9 @@
 [workspace]
 resolver = "3"
 members = ["rice-layout", "rice-ui", "rice-wgpu", "examples/*"]
+
+[workspace.dependencies]
+wgpu = "26.0.1"
+winit = "0.29"
+pollster = "0.4"
+env_logger = { version = "0.11", default-features = false }
