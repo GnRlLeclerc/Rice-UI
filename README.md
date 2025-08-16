@@ -8,6 +8,7 @@ Inspired by the [Clay](https://github.com/nicbarker/clay) UI layout library.
 
 - [`examples`](./examples): usage examples
 - [`rice-layout`](./rice-layout): layout computation framework
+- [`rice-treesitter`](./rice-treesitter): treesitter grammar for Rice DSL
 - [`rice-ui`](./rice-ui): main crate
 - [`rice-wgpu`](./rice-wgpu): WGPU rendering for Rice UI
 

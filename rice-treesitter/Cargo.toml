@@ -1,0 +1,26 @@
+[package]
+name = "rice-treesitter"
+version = "0.1.0"
+edition = "2024"
+autoexamples = false
+
+include = [
+  "grammar.js",
+  "queries/*",
+  "src-rs/*",
+  "src/*",
+  "tree-sitter.json",
+  "LICENSE",
+]
+
+[lib]
+path = "src-rs/lib.rs"
+
+[dependencies]
+tree-sitter-language = "0.1"
+
+[build-dependencies]
+cc = "*"
+
+[dev-dependencies]
+tree-sitter = { workspace = true }

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "rice",
+      "camelcase": "Rice",
+      "title": "Rice",
+      "scope": "source.rice",
+      "file-types": ["rice"],
+      "injection-regex": "^rice$",
+      "class-name": "TreeSitterRice"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Rice grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "Thibaut de Saivre",
+        "email": "thibaut2saivre@gmail.com"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/GnRlLeclerc/Rice-UI"
+    }
+  },
+  "bindings": {
+    "rust": true
+  }
+}
