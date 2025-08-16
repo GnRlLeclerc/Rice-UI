@@ -7,3 +7,4 @@ wgpu = "26.0.1"
 winit = "0.29"
 pollster = "0.4"
 env_logger = { version = "0.11", default-features = false }
+bytemuck = "1.23.2"

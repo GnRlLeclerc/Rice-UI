@@ -28,10 +28,24 @@
       {
         # packages.default = pkgs.callPackage ./default.nix { };
 
-        devShells.default = pkgs.mkShell {
+        devShells.default = pkgs.mkShell rec {
           buildInputs = with pkgs; [
             rust-bin.stable.latest.default
+
+            wayland
+            libxkbcommon
+
+            glfw
+            vulkan-headers
+            vulkan-loader
+            vulkan-validation-layers
+            vulkan-tools
+            vulkan-tools-lunarg
           ];
+
+          LD_LIBRARY_PATH = builtins.toString (pkgs.lib.makeLibraryPath buildInputs);
+          VULKAN_SDK = with pkgs; "${vulkan-headers}";
+          VK_LAYER_PATH = with pkgs; "${vulkan-validation-layers}/share/vulkan/explicit_layer.d";
         };
 
       }

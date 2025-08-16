@@ -1,0 +1,5 @@
+
+root = true
+
+[*.wgsl]
+indent_size = 4
