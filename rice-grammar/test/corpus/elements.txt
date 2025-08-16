@@ -1,0 +1,27 @@
+==================
+Nested Elements
+==================
+
+Element {
+  Element
+
+  Element {}
+
+  Element {
+    Element {}
+  }
+}
+
+---
+
+(source_file
+  (element
+    (classname)
+    (element
+      (classname))
+    (element
+      (classname))
+    (element
+      (classname)
+      (element
+        (classname)))))

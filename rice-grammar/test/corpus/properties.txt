@@ -1,0 +1,46 @@
+==================
+Element properties
+==================
+
+Element {
+  boolean
+
+  boolean: true
+  boolean: false
+
+  string: "example"
+  string: "\"escaped\""
+
+  pixels: 10px
+  fraction: 0.5fr
+  percentage: 50.5%
+}
+
+---
+
+(source_file
+  (element
+    (classname)
+    (property
+      (propname))
+    (property
+      (propname)
+      (boolean))
+    (property
+      (propname)
+      (boolean))
+    (property
+      (propname)
+      (string))
+    (property
+      (propname)
+      (string))
+    (property
+      (propname)
+      (pixels))
+    (property
+      (propname)
+      (fraction))
+    (property
+      (propname)
+      (percentage))))
