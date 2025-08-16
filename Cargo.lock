@@ -991,6 +991,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "parser"
+version = "0.1.0"
+dependencies = [
+ "rice-grammar",
+ "tree-sitter",
+]
+
+[[package]]
 name = "paste"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1169,17 +1177,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19b30a45b0cd0bcca8037f3d0dc3421eaf95327a17cad11964fb8179b4fc4832"
 
 [[package]]
-name = "rice-layout"
+name = "rice-fmt"
 version = "0.1.0"
 
 [[package]]
-name = "rice-treesitter"
+name = "rice-grammar"
 version = "0.1.0"
 dependencies = [
  "cc",
  "tree-sitter",
  "tree-sitter-language",
 ]
+
+[[package]]
+name = "rice-layout"
+version = "0.1.0"
+
+[[package]]
+name = "rice-parser"
+version = "0.1.0"
 
 [[package]]
 name = "rice-ui"
