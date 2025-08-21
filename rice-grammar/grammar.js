@@ -7,15 +7,73 @@
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
 
-module.exports = grammar({
+export default grammar({
   name: "rice",
 
   extras: ($) => [$.comment, $.docstring, /\s+/],
 
-  rules: {
-    source_file: ($) => repeat($._block),
+  conflicts: ($) => [[$.property, $.property_decl]],
 
-    _block: ($) => choice($.element, $.property),
+  rules: {
+    // For now, multiple declarations and components allowed
+    source_file: ($) => repeat(choice($._decl, $.component)),
+
+    // ************************************************* //
+    //                    DECLARATIONS                   //
+    // ************************************************* //
+
+    // Any declaration
+    _decl: ($) => choice($.enum_decl, $.component_decl),
+
+    // Enums
+    enum_decl: ($) =>
+      seq(
+        optional($.docstring),
+        "enum",
+        $.classname,
+        "{",
+        repeat($.identifier),
+        "}",
+      ),
+
+    // Components
+    component_decl: ($) =>
+      seq(
+        optional($.docstring),
+        "component",
+        $.classname,
+        "{",
+        repeat($._block_decl),
+        "}",
+      ),
+
+    // Block inside a component declaration
+    _block_decl: ($) => choice($.property_decl, $.property, $.component),
+
+    // Property declaration, with Golang-style typing
+    property_decl: ($) =>
+      seq(
+        optional($.docstring),
+        $.propname,
+        $.classname,
+        optional($._default_value),
+      ),
+
+    _default_value: ($) => seq("=", $._value),
+
+    // ************************************************* //
+    //                      COMPONENT                    //
+    // ************************************************* //
+
+    // Using a component
+    component: ($) => prec.left(seq($.classname, "{", repeat($._block), "}")),
+
+    // Inside a component, assign to properties or create child components
+    _block: ($) => choice($.property, $.component),
+
+    // ************************************************* //
+    //                    TODO                   //
+    // ************************************************* //
 
     // Starts with double slash
     comment: ($) => seq("//", /[^\n]*/),
@@ -27,10 +85,8 @@ module.exports = grammar({
     classname: ($) => /[A-Z][a-zA-Z0-9_]*/,
     // Starts with lowercase letter
     propname: ($) => /[a-z][a-zA-Z0-9_]*/,
-
-    // Either a classname and content, or omit the parentheses if no content
-    element: ($) =>
-      choice(seq($.classname, "{", repeat($._block), "}"), $.classname),
+    // Starts with lowercase letter
+    identifier: ($) => /[a-z][a-zA-Z0-9_]*/,
 
     property: ($) => choice(seq($.propname, ":", $._value), $.propname),
 
@@ -38,9 +94,16 @@ module.exports = grammar({
     //                        VALUES                     //
     // ************************************************* //
 
-    // Value for a property
+    // Value for a property. Identifiers allowed for now, but no expressions
     _value: ($) =>
-      choice($.boolean, $.string, $.pixels, $.fraction, $.percentage),
+      choice(
+        $.boolean,
+        $.string,
+        $.pixels,
+        $.fraction,
+        $.percentage,
+        $.identifier,
+      ),
 
     boolean: ($) => choice("true", "false"),
 

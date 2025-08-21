@@ -1,0 +1,9 @@
+{
+  "name": "tree-sitter-rice",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Rice grammar for tree-sitter",
+  "devDependencies": {
+    "tree-sitter-cli": "^0.25.8"
+  }
+}
