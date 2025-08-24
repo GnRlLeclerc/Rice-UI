@@ -1297,6 +1297,7 @@ dependencies = [
  "clap",
  "rice-grammar",
  "tree-sitter",
+ "walkdir",
 ]
 
 [[package]]

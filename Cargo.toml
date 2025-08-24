@@ -16,5 +16,6 @@ clap = { version = "4.5.45", features = ["derive"] }
 env_logger = { version = "0.11", default-features = false }
 pollster = "0.4"
 tree-sitter = "0.25.8"
+walkdir = "2"
 wgpu = "26.0.1"
 winit = "0.29"
