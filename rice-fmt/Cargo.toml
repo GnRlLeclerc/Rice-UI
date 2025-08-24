@@ -4,3 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+clap = { workspace = true }
+rice-grammar = { path = "../rice-grammar" }
+tree-sitter = { workspace = true }

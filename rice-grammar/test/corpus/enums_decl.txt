@@ -1,0 +1,34 @@
+==================
+Enum declaration
+==================
+
+/// MyEnum
+/// Docstring
+enum MyEnum {
+  /// Variant one
+  /// Docstring
+  one
+
+  // Comment 1
+
+  // Comment 2
+  // Multiline
+  two
+
+  three
+}
+
+---
+
+(source_file
+  (enum_decl
+    (docstring)
+    (classname)
+    (enum_variant_decl
+      (docstring)
+      (identifier))
+    (comment)
+    (enum_variant_decl
+      (identifier))
+    (enum_variant_decl
+      (identifier))))

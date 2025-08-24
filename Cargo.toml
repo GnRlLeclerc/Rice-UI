@@ -12,6 +12,7 @@ members = [
 
 [workspace.dependencies]
 bytemuck = "1.23.2"
+clap = { version = "4.5.45", features = ["derive"] }
 env_logger = { version = "0.11", default-features = false }
 pollster = "0.4"
 tree-sitter = "0.25.8"

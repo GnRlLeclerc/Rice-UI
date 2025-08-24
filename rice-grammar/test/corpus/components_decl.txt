@@ -1,0 +1,47 @@
+==================
+Component declaration
+==================
+
+/// MyComponent
+/// Docstring
+component MyComponent {
+  /// Field one
+  /// Docstring
+  one Type1
+  two Type2
+
+  // Comment
+
+
+  // Child components
+  Component {}
+  Component {
+    ChildComponent {
+      property: "string"
+    }
+  }
+}
+
+---
+
+(source_file
+  (component_decl
+    (docstring)
+    (classname)
+    (property_decl
+      (docstring)
+      (propname)
+      (classname))
+    (property_decl
+      (propname)
+      (classname))
+    (comment)
+    (component
+      (classname))
+    (component
+      (classname)
+      (component
+        (classname)
+        (property
+          (propname)
+          (string))))))

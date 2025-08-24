@@ -1,0 +1,44 @@
+==================
+Source File root
+==================
+
+/// Some enum
+enum MyEnum { stuff }
+
+// A comment
+
+/// Some component
+component MyComponent {
+  prop String
+}
+
+// Using components
+MyComponent {
+  prop: "string"
+
+  MyComponent {}
+}
+
+---
+
+(source_file
+  (enum_decl
+    (docstring)
+    (classname)
+    (enum_variant_decl
+      (identifier)))
+  (comment)
+  (component_decl
+    (docstring)
+    (classname)
+    (property_decl
+      (propname)
+      (classname)))
+  (comment)
+  (component
+    (classname)
+    (property
+      (propname)
+      (string))
+    (component
+      (classname))))

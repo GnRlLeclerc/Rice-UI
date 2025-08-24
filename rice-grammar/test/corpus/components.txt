@@ -1,40 +1,34 @@
 ==================
-Element properties
+Components
 ==================
 
-Element {
-  boolean
-
+MyComponent {
+  string: "string"
   boolean: true
   boolean: false
+  pixels: 100px
+  fraction: 1fr
+  percentage: 100%
+  value: identifier
 
-  string: "example"
-  string: "\"escaped\""
-
-  pixels: 10px
-  fraction: 0.5fr
-  percentage: 50.5%
+  NestedComponent {
+  }
 }
 
 ---
 
 (source_file
-  (element
+  (component
     (classname)
     (property
-      (propname))
+      (propname)
+      (string))
     (property
       (propname)
       (boolean))
     (property
       (propname)
       (boolean))
-    (property
-      (propname)
-      (string))
-    (property
-      (propname)
-      (string))
     (property
       (propname)
       (pixels))
@@ -43,4 +37,9 @@ Element {
       (fraction))
     (property
       (propname)
-      (percentage))))
+      (percentage))
+    (property
+      (propname)
+      (identifier))
+    (component
+      (classname))))

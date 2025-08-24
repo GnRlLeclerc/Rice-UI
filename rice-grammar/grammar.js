@@ -10,13 +10,13 @@
 export default grammar({
   name: "rice",
 
-  extras: ($) => [$.comment, $.docstring, /\s+/],
+  extras: (_) => [/\s+/],
 
-  conflicts: ($) => [[$.property, $.property_decl]],
+  conflicts: (_) => [],
 
   rules: {
     // For now, multiple declarations and components allowed
-    source_file: ($) => repeat(choice($._decl, $.component)),
+    source_file: ($) => repeat(choice($._decl, $.component, $.comment)),
 
     // ************************************************* //
     //                    DECLARATIONS                   //
@@ -32,7 +32,7 @@ export default grammar({
         "enum",
         $.classname,
         "{",
-        repeat($.identifier),
+        repeat(choice($.enum_variant_decl, $.comment)),
         "}",
       ),
 
@@ -48,7 +48,7 @@ export default grammar({
       ),
 
     // Block inside a component declaration
-    _block_decl: ($) => choice($.property_decl, $.property, $.component),
+    _block_decl: ($) => choice($.property_decl, $.component, $.comment),
 
     // Property declaration, with Golang-style typing
     property_decl: ($) =>
@@ -59,43 +59,45 @@ export default grammar({
         optional($._default_value),
       ),
 
-    _default_value: ($) => seq("=", $._value),
+    enum_variant_decl: ($) => seq(optional($.docstring), $.identifier),
+
+    _default_value: ($) => seq("=", $.value),
 
     // ************************************************* //
     //                      COMPONENT                    //
     // ************************************************* //
 
     // Using a component
-    component: ($) => prec.left(seq($.classname, "{", repeat($._block), "}")),
+    component: ($) => seq($.classname, "{", repeat($._block), "}"),
 
     // Inside a component, assign to properties or create child components
-    _block: ($) => choice($.property, $.component),
+    _block: ($) => choice($.property, $.component, $.comment),
 
     // ************************************************* //
-    //                    TODO                   //
+    //               KEYWORDS & IDENTIFIERS              //
     // ************************************************* //
-
-    // Starts with double slash
-    comment: ($) => seq("//", /[^\n]*/),
 
     // Starts with triple slash
-    docstring: ($) => seq("///", /[^\n]*/),
+    docstring: (_) => prec.right(1, repeat1(seq("///", /[^\n]*/))),
+
+    // Starts with double slash
+    comment: (_) => prec.right(repeat1(seq("//", /[^\n]*/))),
 
     // Starts with capital letter
-    classname: ($) => /[A-Z][a-zA-Z0-9_]*/,
+    classname: (_) => /[A-Z][a-zA-Z0-9_]*/,
     // Starts with lowercase letter
-    propname: ($) => /[a-z][a-zA-Z0-9_]*/,
+    propname: (_) => /[a-z][a-zA-Z0-9_]*/,
     // Starts with lowercase letter
-    identifier: ($) => /[a-z][a-zA-Z0-9_]*/,
+    identifier: (_) => /[a-z][a-zA-Z0-9_]*/,
 
-    property: ($) => choice(seq($.propname, ":", $._value), $.propname),
+    property: ($) => choice(seq($.propname, ":", $.value), $.propname),
 
     // ************************************************* //
     //                        VALUES                     //
     // ************************************************* //
 
     // Value for a property. Identifiers allowed for now, but no expressions
-    _value: ($) =>
+    value: ($) =>
       choice(
         $.boolean,
         $.string,
@@ -105,18 +107,18 @@ export default grammar({
         $.identifier,
       ),
 
-    boolean: ($) => choice("true", "false"),
+    boolean: (_) => choice("true", "false"),
 
     // Anything between double quotes. Escaped quotes are allowed.
-    string: ($) => /"(?:[^"\\]|\\.)*"/,
+    string: (_) => /"(?:[^"\\]|\\.)*"/,
 
     // Pixel amounts (e.g. "10px", "20px")
-    pixels: ($) => /[0-9]+px/,
+    pixels: (_) => /[0-9]+px/,
 
     // Fraction amounts (e.g. 1fr, 2.5fr)
-    fraction: ($) => /[0-9]+(?:\.[0-9]+)?fr/,
+    fraction: (_) => /[0-9]+(?:\.[0-9]+)?fr/,
 
     // Percentage amounts (e.g. 50%, 50.5%)
-    percentage: ($) => /[0-9]+(?:\.[0-9]+)?%/,
+    percentage: (_) => /[0-9]+(?:\.[0-9]+)?%/,
   },
 });
