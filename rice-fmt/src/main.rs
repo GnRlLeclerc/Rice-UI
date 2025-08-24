@@ -1,20 +1,17 @@
 use std::{
     fs,
-    io::{self, Write},
+    io::{self},
     path::Path,
 };
 
 use clap::Parser;
-use tree_sitter::Node;
 
-use crate::{
-    components::{format_component, format_component_decl},
-    enums::format_enum_decl,
-};
+use crate::root::format_source_file;
 
 mod components;
 mod enums;
 mod properties;
+mod root;
 mod utils;
 
 /// Format Rice files
@@ -45,20 +42,6 @@ fn main() {
             .expect("Error parsing content with Rice grammar");
 
         // Iterate through the tree and format it to the output
-        let mut stdout = io::stdout();
-        for node in tree.root_node().children(&mut tree.walk()) {
-            format_root_node(node, &content.as_bytes(), &mut stdout).unwrap();
-        }
+        format_source_file(tree, content.as_bytes(), &mut io::stdout()).unwrap();
     }
-}
-
-fn format_root_node<W: Write>(node: Node, content: &[u8], writer: &mut W) -> io::Result<()> {
-    match node.kind() {
-        "enum_decl" => format_enum_decl(node, 0, content, writer)?,
-        "component_decl" => format_component_decl(node, 0, content, writer)?,
-        "component" => format_component(node, 0, content, writer)?,
-        _ => unreachable!("Unknown root node type: {}", node.kind()),
-    };
-
-    Ok(())
 }
