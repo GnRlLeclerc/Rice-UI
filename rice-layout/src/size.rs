@@ -8,6 +8,8 @@ pub enum Size {
     Fixed(i32),
     /// Expand to a fraction of available space
     Expand(f32),
+    /// Percentage of parent element
+    Percent(f32),
 }
 
 impl Default for Size {

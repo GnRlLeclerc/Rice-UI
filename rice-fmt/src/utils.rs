@@ -1,10 +1,11 @@
 //! Formatting utilities
 
+use anyhow::{Result, anyhow};
 use std::io;
 use tree_sitter::Node;
 
 /// Write indentation corresponding to the given depth
-pub fn format_indent<W: io::Write>(depth: usize, writer: &mut W) -> io::Result<()> {
+pub fn format_indent<W: io::Write>(depth: usize, writer: &mut W) -> Result<()> {
     for _ in 0..depth {
         writer.write_all(b"  ")?;
     }
@@ -17,7 +18,7 @@ pub fn format_lines<W: io::Write>(
     depth: usize,
     content: &[u8],
     writer: &mut W,
-) -> io::Result<()> {
+) -> Result<()> {
     // Split into consecutive lines to reindent them properly
     for line in content[node.byte_range()].split(|&b| b == b'\n') {
         format_indent(depth, writer)?;
@@ -26,4 +27,11 @@ pub fn format_lines<W: io::Write>(
     }
 
     Ok(())
+}
+
+pub fn node_error(node: Node, content: &[u8]) -> Result<()> {
+    Err(anyhow!(
+        "Syntax error:\n{}",
+        String::from_utf8_lossy(&content[node.byte_range()]).to_string()
+    ))
 }

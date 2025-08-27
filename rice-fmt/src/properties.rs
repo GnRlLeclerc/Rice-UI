@@ -2,16 +2,17 @@
 
 use std::io;
 
+use anyhow::Result;
 use tree_sitter::Node;
 
-use crate::utils::{format_indent, format_lines};
+use crate::utils::{format_indent, format_lines, node_error};
 
 pub fn format_property_decl<W: io::Write>(
     node: Node,
     depth: usize,
     content: &[u8],
     writer: &mut W,
-) -> io::Result<()> {
+) -> Result<()> {
     for child in node.named_children(&mut node.walk()) {
         match child.kind() {
             "docstring" => format_lines(child, depth, content, writer)?,
@@ -29,10 +30,11 @@ pub fn format_property_decl<W: io::Write>(
                 writer.write_all(b" = ")?;
                 writer.write_all(&content[child.byte_range()])?;
             }
-            _ => unreachable!("Unknown property decl child node type: {}", child.kind()),
+            _ => node_error(node, content)?,
         };
     }
-    writer.write_all(b"\n")
+    writer.write_all(b"\n")?;
+    Ok(())
 }
 
 pub fn format_property<W: io::Write>(
@@ -40,7 +42,7 @@ pub fn format_property<W: io::Write>(
     depth: usize,
     content: &[u8],
     writer: &mut W,
-) -> io::Result<()> {
+) -> Result<()> {
     for child in node.named_children(&mut node.walk()) {
         match child.kind() {
             "propname" => {
@@ -52,8 +54,9 @@ pub fn format_property<W: io::Write>(
                 writer.write_all(b": ")?;
                 writer.write_all(&content[child.byte_range()])?;
             }
-            _ => unreachable!("Unknown property child node type: {}", child.kind()),
+            _ => node_error(node, content)?,
         };
     }
-    writer.write_all(b"\n")
+    writer.write_all(b"\n")?;
+    Ok(())
 }
