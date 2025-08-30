@@ -14,6 +14,7 @@ pub fn format_property_decl<W: io::Write>(
     writer: &mut W,
 ) -> Result<()> {
     for child in node.named_children(&mut node.walk()) {
+        node_error(child, content)?;
         match child.kind() {
             "docstring" => format_lines(child, depth, content, writer)?,
             "propname" => {
@@ -30,7 +31,7 @@ pub fn format_property_decl<W: io::Write>(
                 writer.write_all(b" = ")?;
                 writer.write_all(&content[child.byte_range()])?;
             }
-            _ => node_error(node, content)?,
+            _ => unreachable!("Unexpected node kind for property decl: {}", child.kind()),
         };
     }
     writer.write_all(b"\n")?;
@@ -44,6 +45,7 @@ pub fn format_property<W: io::Write>(
     writer: &mut W,
 ) -> Result<()> {
     for child in node.named_children(&mut node.walk()) {
+        node_error(child, content)?;
         match child.kind() {
             "propname" => {
                 format_indent(depth, writer)?;
@@ -54,7 +56,7 @@ pub fn format_property<W: io::Write>(
                 writer.write_all(b": ")?;
                 writer.write_all(&content[child.byte_range()])?;
             }
-            _ => node_error(node, content)?,
+            _ => unreachable!("Unexpected node kind for property: {}", child.kind()),
         };
     }
     writer.write_all(b"\n")?;

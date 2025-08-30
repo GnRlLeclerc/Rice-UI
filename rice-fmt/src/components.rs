@@ -17,6 +17,7 @@ pub fn format_component_decl<W: io::Write>(
     writer: &mut W,
 ) -> Result<()> {
     for child in node.named_children(&mut node.walk()) {
+        node_error(child, content)?;
         match child.kind() {
             "docstring" => format_lines(child, depth, content, writer)?,
             "classname" => {
@@ -28,7 +29,7 @@ pub fn format_component_decl<W: io::Write>(
             "property_decl" => format_property_decl(child, depth + 1, content, writer)?,
             "comment" => format_lines(child, depth + 1, content, writer)?,
             "component" => format_component(child, depth + 1, content, writer)?,
-            _ => node_error(node, content)?,
+            _ => unreachable!("Unexpected node kind for component decl: {}", child.kind()),
         };
     }
     format_indent(depth, writer)?;
@@ -43,6 +44,7 @@ pub fn format_component<W: io::Write>(
     writer: &mut W,
 ) -> Result<()> {
     for child in node.named_children(&mut node.walk()) {
+        node_error(child, content)?;
         match child.kind() {
             "docstring" => format_lines(child, depth, content, writer)?,
             "classname" => {
@@ -53,7 +55,7 @@ pub fn format_component<W: io::Write>(
             "property" => format_property(child, depth + 1, content, writer)?,
             "comment" => format_lines(child, depth + 1, content, writer)?,
             "component" => format_component(child, depth + 1, content, writer)?,
-            _ => node_error(node, content)?,
+            _ => unreachable!("Unexpected node kind for component: {}", child.kind()),
         };
     }
     format_indent(depth, writer)?;

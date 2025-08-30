@@ -14,6 +14,7 @@ pub fn format_enum_decl<W: io::Write>(
     writer: &mut W,
 ) -> Result<()> {
     for child in node.named_children(&mut node.walk()) {
+        node_error(child, content)?;
         match child.kind() {
             "docstring" => format_lines(child, depth, content, writer)?,
             "classname" => {
@@ -25,7 +26,7 @@ pub fn format_enum_decl<W: io::Write>(
             "enum_variant_decl" => {
                 format_enum_variant_decl(child, depth + 1, content, writer)?;
             }
-            _ => node_error(node, content)?,
+            _ => unreachable!("Unexpected node kind for enum decl: {}", child.kind()),
         }
     }
     format_indent(depth, writer)?;
@@ -40,6 +41,7 @@ pub fn format_enum_variant_decl<W: io::Write>(
     writer: &mut W,
 ) -> Result<()> {
     for child in node.named_children(&mut node.walk()) {
+        node_error(child, content)?;
         match child.kind() {
             "docstring" => format_lines(child, depth, content, writer)?,
             "identifier" => {
@@ -47,7 +49,10 @@ pub fn format_enum_variant_decl<W: io::Write>(
                 writer.write_all(&content[child.byte_range()])?;
                 writer.write_all(b"\n")?;
             }
-            _ => node_error(node, content)?,
+            _ => unreachable!(
+                "Unexpected node kind for enum variant decl: {}",
+                child.kind()
+            ),
         };
     }
     Ok(())
