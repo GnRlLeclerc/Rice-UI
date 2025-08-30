@@ -1,6 +1,6 @@
 //! Size constraints
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Size {
     /// Fit content
     Fit,

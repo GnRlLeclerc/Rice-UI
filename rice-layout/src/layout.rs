@@ -1,45 +1,82 @@
-//! Layout directions
+/// Layout constraints
+use crate::{Align, Direction, Gap, Insets, Size};
 
-use crate::{AlignmentH, AlignmentV, Div, Rect};
+/// Layout rules
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct Layout {
+    pub size: [Size; 2],
+    pub min_size: [Option<i32>; 2],
+    pub max_size: [Option<i32>; 2],
 
-/// Layout directions for content
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Layout {
-    Horizontal(AlignmentH),
-    Vertical(AlignmentV),
-}
+    // Margin & padding expressed along x, y axes directions
+    pub margin: Insets,
+    pub padding: Insets,
 
-impl Default for Layout {
-    fn default() -> Self {
-        Layout::Vertical(AlignmentV::Left)
-    }
+    pub direction: Direction,
+    pub gap: Gap,
 }
 
 impl Layout {
-    /// Positions pass:
-    /// Compute the remaining space within a parent when removing that taken by the children.
-    pub fn remaining_space(
-        &self,
-        node: usize,
-        div: &Div,
-        nodes: &[Rect],
-        children: &[Vec<usize>],
-    ) -> i32 {
-        match self {
-            Layout::Horizontal(_) => {
-                let mut remaining = nodes[node].width - div.padding.left - div.padding.right;
-                for (&node, div) in children[node].iter().zip(div.children.iter()) {
-                    remaining -= nodes[node].width + div.margin.left + div.margin.right;
-                }
-                remaining
-            }
-            Layout::Vertical(_) => {
-                let mut remaining = nodes[node].height - div.padding.bottom - div.padding.top;
-                for (&node, div) in children[node].iter().zip(div.children.iter()) {
-                    remaining -= nodes[node].height + div.margin.bottom + div.margin.top;
-                }
-                remaining
-            }
+    pub fn new(width: Size, height: Size) -> Self {
+        Self {
+            size: [width, height],
+            ..Default::default()
         }
+    }
+
+    pub fn margin(mut self, insets: Insets) -> Self {
+        self.margin = insets;
+        self
+    }
+
+    pub fn padding(mut self, insets: Insets) -> Self {
+        self.padding = insets;
+        self
+    }
+
+    pub fn vertical(mut self, align: Align) -> Self {
+        self.direction = Direction::Vertical(align);
+        self
+    }
+
+    pub fn horizontal(mut self, align: Align) -> Self {
+        self.direction = Direction::Horizontal(align);
+        self
+    }
+
+    pub fn gap(mut self, gap: Gap) -> Self {
+        self.gap = gap;
+        self
+    }
+
+    pub fn max_width(mut self, max: i32) -> Self {
+        self.max_size[0] = Some(max);
+        self
+    }
+
+    pub fn max_height(mut self, max: i32) -> Self {
+        self.max_size[1] = Some(max);
+        self
+    }
+
+    pub fn min_width(mut self, min: i32) -> Self {
+        self.min_size[0] = Some(min);
+        self
+    }
+
+    pub fn min_height(mut self, min: i32) -> Self {
+        self.min_size[1] = Some(min);
+        self
+    }
+
+    pub fn clip_size(&self, dim: usize, size: i32) -> i32 {
+        let mut clipped = size;
+        if let Some(min) = self.min_size[dim] {
+            clipped = clipped.max(min);
+        }
+        if let Some(max) = self.max_size[dim] {
+            clipped = clipped.min(max);
+        }
+        clipped
     }
 }

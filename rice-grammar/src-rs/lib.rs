@@ -7,7 +7,7 @@
 //! let code = r#"
 //! "#;
 //! let mut parser = tree_sitter::Parser::new();
-//! let language = tree_sitter_rice::LANGUAGE;
+//! let language = rice_grammar::LANGUAGE;
 //! parser
 //!     .set_language(&language.into())
 //!     .expect("Error loading Rice parser");

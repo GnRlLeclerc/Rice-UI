@@ -29,9 +29,13 @@ pub fn format_lines<W: io::Write>(
     Ok(())
 }
 
+/// Returns an error if the node is an error node
 pub fn node_error(node: Node, content: &[u8]) -> Result<()> {
-    Err(anyhow!(
-        "Syntax error:\n{}",
-        String::from_utf8_lossy(&content[node.byte_range()]).to_string()
-    ))
+    match node.is_error() {
+        true => Err(anyhow!(
+            "Syntax error:\n{}",
+            String::from_utf8_lossy(&content[node.byte_range()]).to_string()
+        )),
+        false => Ok(()),
+    }
 }
