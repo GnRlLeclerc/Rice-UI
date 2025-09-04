@@ -1,0 +1,53 @@
+// Screen physical size
+struct Screen {
+    // Physical size
+    size: vec2<f32>,
+    // Logical to physical scaling factor
+    scale: f32,
+};
+
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) size: vec2<f32>,
+    @location(1) offset: vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> time: f32;
+@group(0) @binding(1) var<uniform> screen: Screen;
+
+@vertex
+fn vertex_shader(
+    @location(0) vertex: vec2<f32>,
+    @location(1) size_i: vec2<i32>,
+    @location(2) offset_i: vec2<i32>,
+) -> VertexOutput {
+    var out: VertexOutput;
+
+    // Cast i32 to f32
+    var size: vec2<f32> = vec2<f32>(size_i);
+    var offset: vec2<f32> = vec2<f32>(offset_i);
+
+    // Pass physical size & position to fragment shader
+    out.size = size * screen.scale;
+    out.offset = offset * screen.scale;
+
+    // Fix y axis inversion
+    offset.y = screen.size.y / screen.scale - offset.y;
+    size.y = -size.y;
+
+    out.position = vec4<f32>(
+        (vertex * size + offset * 2) * screen.scale / screen.size - 1.0,
+        0.0,
+        1.0
+    );
+
+    return out;
+}
+
+
+@fragment
+fn fragment_shader(
+    in: VertexOutput,
+) -> @location(0) vec4<f32> {
+    return vec4<f32>(1.0, 0.0, 0.0, 1.0); // Red
+}

@@ -5,13 +5,13 @@ use crate::{Size, utils::*};
 
 pub struct Arena {
     /// Layout rules
-    pub(crate) layouts: Vec<Layout>,
+    pub layouts: Vec<Layout>,
     /// Computed sizes & positions
-    pub(crate) rects: Vec<Rect>,
+    pub rects: Vec<Rect>,
     /// Children indices for each node
-    pub(crate) children: Vec<Vec<usize>>,
+    pub children: Vec<Vec<usize>>,
     /// Reusable indices
-    pub(crate) free: Vec<usize>,
+    free: Vec<usize>,
 }
 
 impl Arena {
@@ -43,17 +43,16 @@ impl Arena {
     /// Insert a root node into the arena
     pub fn insert(&mut self, layout: Layout) -> usize {
         let rect = Rect::default();
-        let children = Vec::new();
 
         if let Some(index) = self.free.pop() {
             self.layouts[index] = layout;
             self.rects[index] = rect;
-            self.children[index] = children;
+            self.children[index].clear();
             index
         } else {
             self.layouts.push(layout);
             self.rects.push(rect);
-            self.children.push(children);
+            self.children.push(vec![]);
             self.layouts.len() - 1
         }
     }

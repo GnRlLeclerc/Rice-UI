@@ -1,5 +1,7 @@
 //! Computed size and positions for a layout element
 
+#[cfg_attr(feature = "pod", repr(C))]
+#[cfg_attr(feature = "pod", derive(Copy, bytemuck::Pod, bytemuck::Zeroable))]
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Rect {
     pub size: [i32; 2],
