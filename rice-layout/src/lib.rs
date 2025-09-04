@@ -9,7 +9,7 @@ mod rect;
 mod size;
 mod utils;
 
-pub use arena::Arena;
+pub use arena::{Arena, compute_layout};
 pub use direction::{Align, Direction};
 pub use gap::Gap;
 pub use insets::Insets;

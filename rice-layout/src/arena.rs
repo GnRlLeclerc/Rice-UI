@@ -3,6 +3,7 @@
 use crate::{Direction, Layout, Rect};
 use crate::{Size, utils::*};
 
+/// A basic arena structure to hold layout nodes
 pub struct Arena {
     /// Layout rules
     pub layouts: Vec<Layout>,
@@ -27,17 +28,7 @@ impl Arena {
 
     /// Recompute the entire layout starting from the given root node
     pub fn compute_layout(&mut self, root: usize) {
-        // 1st pass: compute fixed widths (top-down)
-        recurse_fixed(root, &self.layouts, &mut self.rects, &self.children, 0);
-        // 2nd pass: compute expand widths (bottom-up)
-        recurse_grow_width(root, &self.layouts, &mut self.rects, &self.children);
-        // 3rd pass: compute text height after wrapping (todo)
-        // 4th pass: compute fixed heights (top-down)
-        recurse_fixed(root, &self.layouts, &mut self.rects, &self.children, 1);
-        // 5th pass: compute expand heights (bottom-up)
-        recurse_grow_height(root, &self.layouts, &mut self.rects, &self.children);
-        // 6th pass: compute positions (top-down)
-        recurse_positions(root, &self.layouts, &mut self.rects, &self.children);
+        compute_layout(root, &self.layouts, &mut self.rects, &self.children);
     }
 
     /// Insert a root node into the arena
@@ -68,6 +59,26 @@ impl Arena {
     pub fn remove(&mut self, index: usize) {
         recurse_remove(index, &mut self.free, &self.children);
     }
+}
+
+/// Compute a layout starting from the given node index
+pub fn compute_layout(
+    root: usize,
+    layouts: &[Layout],
+    rects: &mut [Rect],
+    children: &[Vec<usize>],
+) {
+    // 1st pass: compute fixed widths (top-down)
+    recurse_fixed(root, layouts, rects, children, 0);
+    // 2nd pass: compute expand widths (bottom-up)
+    recurse_grow_width(root, layouts, rects, children);
+    // 3rd pass: compute text height after wrapping (todo)
+    // 4th pass: compute fixed heights (top-down)
+    recurse_fixed(root, layouts, rects, children, 1);
+    // 5th pass: compute expand heights (bottom-up)
+    recurse_grow_height(root, layouts, rects, children);
+    // 6th pass: compute positions (top-down)
+    recurse_positions(root, layouts, rects, children);
 }
 
 /// Compute fixed & percent dimensions in a top-down recursive way
