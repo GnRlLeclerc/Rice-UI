@@ -3,64 +3,6 @@
 use crate::{Direction, Layout, Rect};
 use crate::{Size, utils::*};
 
-/// A basic arena structure to hold layout nodes
-pub struct Arena {
-    /// Layout rules
-    pub layouts: Vec<Layout>,
-    /// Computed sizes & positions
-    pub rects: Vec<Rect>,
-    /// Children indices for each node
-    pub children: Vec<Vec<usize>>,
-    /// Reusable indices
-    free: Vec<usize>,
-}
-
-impl Arena {
-    /// Create a new empty arena
-    pub fn new() -> Self {
-        Self {
-            layouts: Vec::new(),
-            rects: Vec::new(),
-            children: Vec::new(),
-            free: Vec::new(),
-        }
-    }
-
-    /// Recompute the entire layout starting from the given root node
-    pub fn compute_layout(&mut self, root: usize) {
-        compute_layout(root, &self.layouts, &mut self.rects, &self.children);
-    }
-
-    /// Insert a root node into the arena
-    pub fn insert(&mut self, layout: Layout) -> usize {
-        let rect = Rect::default();
-
-        if let Some(index) = self.free.pop() {
-            self.layouts[index] = layout;
-            self.rects[index] = rect;
-            self.children[index].clear();
-            index
-        } else {
-            self.layouts.push(layout);
-            self.rects.push(rect);
-            self.children.push(vec![]);
-            self.layouts.len() - 1
-        }
-    }
-
-    /// Insert a child node into the arena
-    pub fn insert_child(&mut self, layout: Layout, parent: usize) -> usize {
-        let index = self.insert(layout);
-        self.children[parent].push(index);
-        index
-    }
-
-    /// Remove a node and all its children from the arena
-    pub fn remove(&mut self, index: usize) {
-        recurse_remove(index, &mut self.free, &self.children);
-    }
-}
-
 /// Compute a layout starting from the given node index
 pub fn compute_layout(
     root: usize,
@@ -159,13 +101,5 @@ fn recurse_positions(node: usize, layouts: &[Layout], rects: &mut [Rect], childr
     // 2. Recurse children
     for &idx in &children[node] {
         recurse_positions(idx, layouts, rects, children);
-    }
-}
-
-fn recurse_remove(node: usize, free: &mut Vec<usize>, children: &[Vec<usize>]) {
-    free.push(node);
-
-    for &child in &children[node] {
-        recurse_remove(child, free, children);
     }
 }

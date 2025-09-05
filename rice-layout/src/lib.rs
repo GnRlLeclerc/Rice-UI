@@ -1,6 +1,6 @@
 //! 2D layout engine
 
-mod arena;
+mod compute;
 mod direction;
 mod gap;
 mod insets;
@@ -9,7 +9,7 @@ mod rect;
 mod size;
 mod utils;
 
-pub use arena::{Arena, compute_layout};
+pub use compute::compute_layout;
 pub use direction::{Align, Direction};
 pub use gap::Gap;
 pub use insets::Insets;
@@ -20,6 +20,48 @@ pub use size::Size;
 #[cfg(test)]
 mod tests {
     use crate::*;
+
+    /// A basic arena structure to hold layout nodes
+    struct Arena {
+        /// Layout rules
+        pub layouts: Vec<Layout>,
+        /// Computed sizes & positions
+        pub rects: Vec<Rect>,
+        /// Children indices for each node
+        pub children: Vec<Vec<usize>>,
+    }
+
+    impl Arena {
+        /// Create a new empty arena
+        pub fn new() -> Self {
+            Self {
+                layouts: Vec::new(),
+                rects: Vec::new(),
+                children: Vec::new(),
+            }
+        }
+
+        /// Recompute the entire layout starting from the given root node
+        pub fn compute_layout(&mut self, root: usize) {
+            compute_layout(root, &self.layouts, &mut self.rects, &self.children);
+        }
+
+        /// Insert a root node into the arena
+        pub fn insert(&mut self, layout: Layout) -> usize {
+            let rect = Rect::default();
+            self.layouts.push(layout);
+            self.rects.push(rect);
+            self.children.push(vec![]);
+            self.layouts.len() - 1
+        }
+
+        /// Insert a child node into the arena
+        pub fn insert_child(&mut self, layout: Layout, parent: usize) -> usize {
+            let index = self.insert(layout);
+            self.children[parent].push(index);
+            index
+        }
+    }
 
     /// Fixed sizes to test
     static SIZES: &'static [i32] = &[0, 100, 200];

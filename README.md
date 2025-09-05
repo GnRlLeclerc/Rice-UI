@@ -7,6 +7,8 @@ Inspired by the [Clay](https://github.com/nicbarker/clay) UI layout library.
 ## Project Crates
 
 - [`examples`](./examples): usage examples
+- [`rice-dom`](./rice-dom): DOM management
+- [`rice-fmt`](./rice-fmt): formatter for Rice DSL
 - [`rice-grammar`](./rice-grammar): treesitter grammar for Rice DSL
 - [`rice-layout`](./rice-layout): layout computation framework
 - [`rice-ui`](./rice-ui): main crate

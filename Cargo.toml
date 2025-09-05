@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
+  "rice-dom",
   "rice-fmt",
   "rice-grammar",
   "rice-layout",
