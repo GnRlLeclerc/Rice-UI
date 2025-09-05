@@ -1304,6 +1304,10 @@ checksum = "19b30a45b0cd0bcca8037f3d0dc3421eaf95327a17cad11964fb8179b4fc4832"
 [[package]]
 name = "rice-dom"
 version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "rice-layout",
+]
 
 [[package]]
 name = "rice-fmt"
@@ -1340,6 +1344,7 @@ version = "0.1.0"
 name = "rice-ui"
 version = "0.1.0"
 dependencies = [
+ "rice-dom",
  "rice-layout",
  "rice-wgpu",
 ]
@@ -1351,6 +1356,7 @@ dependencies = [
  "bytemuck",
  "env_logger",
  "pollster",
+ "rice-dom",
  "rice-layout",
  "wgpu",
  "winit",

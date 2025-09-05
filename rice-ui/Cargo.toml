@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+rice-dom = { path = "../rice-dom" }
 rice-layout = { path = "../rice-layout" }
 rice-wgpu = { path = "../rice-wgpu" }

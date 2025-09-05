@@ -4,8 +4,9 @@
 //! - timer (uniform, for animations)
 //! - rect data (storage buffer)
 
-use std::borrow::Cow;
+use std::{borrow::Cow, num::NonZeroU64};
 
+use rice_dom::{Color, Style};
 use rice_layout::Rect;
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},
@@ -36,6 +37,8 @@ pub struct Pipeline {
     pub vertex_buffer: Buffer,
     /// Instance buffer (positions & sizes)
     pub rects_buffer: Buffer,
+    /// Instance buffer (styles)
+    pub styles_buffer: Buffer,
     /// Base rectangle index buffer
     pub index_buffer: Buffer,
 
@@ -84,6 +87,7 @@ impl Pipeline {
             usage: BufferUsages::INDEX,
         });
         let rects_buffer = Self::create_rects_buffer(device, size);
+        let styles_buffer = Self::create_styles_buffer(device, size);
 
         // ***************************************** //
         //             BIND GROUP LAYOUTS            //
@@ -140,6 +144,16 @@ impl Pipeline {
                 },
             ],
         };
+        let styles_layout = VertexBufferLayout {
+            array_stride: std::mem::size_of::<[f32; 4]>() as BufferAddress,
+            step_mode: VertexStepMode::Instance,
+            // RGBA color
+            attributes: &[VertexAttribute {
+                format: VertexFormat::Float32x4,
+                offset: 0,
+                shader_location: 3,
+            }],
+        };
 
         // ***************************************** //
         //                 BIND GROUPS               //
@@ -182,7 +196,7 @@ impl Pipeline {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: None,
-                buffers: &[vertex_layout, rects_layout],
+                buffers: &[vertex_layout, rects_layout, styles_layout],
                 compilation_options: Default::default(),
             },
             fragment: Some(wgpu::FragmentState {
@@ -213,6 +227,7 @@ impl Pipeline {
             screen_buffer,
             vertex_buffer,
             rects_buffer,
+            styles_buffer,
             index_buffer,
 
             uniforms_group,
@@ -235,6 +250,7 @@ impl Pipeline {
         // Vertex buffers
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
         render_pass.set_vertex_buffer(1, self.rects_buffer.slice(..));
+        render_pass.set_vertex_buffer(2, self.styles_buffer.slice(..));
     }
 
     pub fn update_timer(&self, queue: &Queue, time: f32) {
@@ -256,15 +272,40 @@ impl Pipeline {
     }
 
     /// Update rect data in internal buffers
-    pub fn update_rects(&mut self, device: &Device, queue: &Queue, rects: &[Rect]) {
+    pub fn update_elements(
+        &mut self,
+        device: &Device,
+        queue: &Queue,
+        rects: &[Rect],
+        styles: &[Style],
+    ) {
+        assert!(rects.len() == styles.len());
+        assert!(rects.len() > 0);
+
         // Reallocate buffers if needed
         if rects.len() > self.size {
             self.rects_buffer = Self::create_rects_buffer(device, rects.len());
+            self.styles_buffer = Self::create_styles_buffer(device, styles.len());
             self.size = rects.len() * 2;
         }
 
         // Directly write rects to the rect buffer
         queue.write_buffer(&self.rects_buffer, 0, bytemuck::cast_slice(rects));
+
+        // Write per-variant data to the styles buffer
+        let size = (std::mem::size_of::<[f32; 4]>() * styles.len()) as u64;
+        let size = NonZeroU64::new(size).unwrap();
+        let mut buffer = queue
+            .write_buffer_with(&self.styles_buffer, 0, size)
+            .expect("Failed to map styles buffer");
+
+        let size = std::mem::size_of::<[f32; 4]>();
+        for (i, style) in styles.iter().enumerate() {
+            let color = match style {
+                Style::Rect(color) => color.0,
+            };
+            buffer[i * size..(i + 1) * size].copy_from_slice(bytemuck::cast_slice(&color));
+        }
     }
 
     // ************************************************* //
@@ -275,6 +316,15 @@ impl Pipeline {
         device.create_buffer(&BufferDescriptor {
             label: Some("Rect Data Buffer"),
             size: (size * std::mem::size_of::<Rect>()) as u64,
+            usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        })
+    }
+
+    fn create_styles_buffer(device: &Device, size: usize) -> Buffer {
+        device.create_buffer(&BufferDescriptor {
+            label: Some("Styles Buffer"),
+            size: (size * std::mem::size_of::<Color>()) as u64,
             usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
             mapped_at_creation: false,
         })

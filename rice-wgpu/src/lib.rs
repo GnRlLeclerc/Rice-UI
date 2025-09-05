@@ -1,7 +1,7 @@
 mod init;
 mod pipeline;
 
-use rice_layout::Arena;
+use rice_dom::DOM;
 use winit::{
     event::{Event, WindowEvent},
     event_loop::EventLoop,
@@ -10,12 +10,12 @@ use winit::{
 
 use crate::{init::init_wgpu, pipeline::Pipeline};
 
-pub async fn run(event_loop: EventLoop<()>, window: Window, arena: Arena) {
+pub async fn run(event_loop: EventLoop<()>, window: Window, dom: DOM) {
     let window = &window;
     let (device, queue, surface, format, mut config) = init_wgpu(window).await;
 
     let mut pipeline = Pipeline::new(&device, window, format, 100);
-    pipeline.update_rects(&device, &queue, &arena.rects);
+    pipeline.update_elements(&device, &queue, &dom.rects, &dom.styles);
 
     event_loop
         .run(move |event, target| {

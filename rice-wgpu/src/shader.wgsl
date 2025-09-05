@@ -10,6 +10,7 @@ struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) size: vec2<f32>,
     @location(1) offset: vec2<f32>,
+    @location(2) color: vec4<f32>,
 }
 
 @group(0) @binding(0) var<uniform> time: f32;
@@ -20,6 +21,7 @@ fn vertex_shader(
     @location(0) vertex: vec2<f32>,
     @location(1) size_i: vec2<i32>,
     @location(2) offset_i: vec2<i32>,
+    @location(3) color: vec4<f32>,
 ) -> VertexOutput {
     var out: VertexOutput;
 
@@ -30,6 +32,7 @@ fn vertex_shader(
     // Pass physical size & position to fragment shader
     out.size = size * screen.scale;
     out.offset = offset * screen.scale;
+    out.color = color;
 
     // Fix y axis inversion
     offset.y = screen.size.y / screen.scale - offset.y;
@@ -49,5 +52,5 @@ fn vertex_shader(
 fn fragment_shader(
     in: VertexOutput,
 ) -> @location(0) vec4<f32> {
-    return vec4<f32>(1.0, 0.0, 0.0, 1.0); // Red
+    return in.color;
 }

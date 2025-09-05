@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 rice-layout = { path = "../rice-layout", features = ["pod"] }
+rice-dom = { path = "../rice-dom", features = ["pod"] }
 wgpu = { workspace = true }
 winit = { workspace = true }
 pollster = { workspace = true }
