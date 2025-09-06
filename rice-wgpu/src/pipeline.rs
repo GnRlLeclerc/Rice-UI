@@ -1,8 +1,8 @@
 //! Drawing pipeline manager
 
-use std::{borrow::Cow, num::NonZeroU64};
+use std::borrow::Cow;
 
-use rice_dom::{Color, DOM, Style};
+use rice_dom::{DOM, Style};
 use rice_layout::Rect;
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},

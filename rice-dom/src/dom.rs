@@ -19,6 +19,8 @@ pub struct DOM {
 
     /// Hover state
     pub hovered: Option<usize>,
+    /// Clicked state
+    pub clicked: Option<usize>,
 
     /// Dirty nodes that must be redrawn with their children
     pub dirty: Vec<usize>,
@@ -37,6 +39,7 @@ impl DOM {
             styles_rules: Vec::new(),
 
             hovered: None,
+            clicked: None,
             dirty: Vec::new(),
             redraw: Vec::new(),
         }
