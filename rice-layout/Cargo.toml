@@ -2,10 +2,3 @@
 name = "rice-layout"
 version = "0.1.0"
 edition = "2024"
-
-[dependencies]
-bytemuck = { workspace = true, optional = true }
-
-[features]
-# repr(C), derive Pod & Zeroable for rects
-pod = ["bytemuck"]

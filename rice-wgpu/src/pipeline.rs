@@ -1,18 +1,16 @@
-//! Shader bind groups
-//!
-//! There are 2:
-//! - timer (uniform, for animations)
-//! - rect data (storage buffer)
+//! Drawing pipeline manager
 
 use std::{borrow::Cow, num::NonZeroU64};
 
-use rice_dom::{Color, Style};
+use rice_dom::{Color, DOM, Style};
 use rice_layout::Rect;
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},
     *,
 };
 use winit::window::Window;
+
+use crate::write_buffer::{WriteBuffer, write_indexed_slice_to_buffer};
 
 /// Vertex indices to draw a rectangle from 2 triangles
 const INDICES: &[u16] = &[0, 1, 2, 2, 3, 0];
@@ -272,40 +270,22 @@ impl Pipeline {
     }
 
     /// Update rect data in internal buffers
-    pub fn update_elements(
-        &mut self,
-        device: &Device,
-        queue: &Queue,
-        rects: &[Rect],
-        styles: &[Style],
-    ) {
-        assert!(rects.len() == styles.len());
-        assert!(rects.len() > 0);
+    pub fn update_elements(&mut self, device: &Device, queue: &Queue, dom: &DOM) {
+        assert!(dom.rects.len() == dom.styles.len());
+        assert!(dom.rects.len() > 0);
 
         // Reallocate buffers if needed
-        if rects.len() > self.size {
-            self.rects_buffer = Self::create_rects_buffer(device, rects.len());
-            self.styles_buffer = Self::create_styles_buffer(device, styles.len());
-            self.size = rects.len() * 2;
+        if dom.rects.len() > self.size {
+            self.rects_buffer = Self::create_rects_buffer(device, dom.rects.len() * 2);
+            self.styles_buffer = Self::create_styles_buffer(device, dom.styles.len() * 2);
+            self.size = dom.rects.len() * 2;
         }
 
-        // Directly write rects to the rect buffer
-        queue.write_buffer(&self.rects_buffer, 0, bytemuck::cast_slice(rects));
+        // Write rects to buffer
+        write_indexed_slice_to_buffer(&dom.rects, &dom.redraw, &self.rects_buffer, queue);
 
-        // Write per-variant data to the styles buffer
-        let size = (std::mem::size_of::<[f32; 4]>() * styles.len()) as u64;
-        let size = NonZeroU64::new(size).unwrap();
-        let mut buffer = queue
-            .write_buffer_with(&self.styles_buffer, 0, size)
-            .expect("Failed to map styles buffer");
-
-        let size = std::mem::size_of::<[f32; 4]>();
-        for (i, style) in styles.iter().enumerate() {
-            let color = match style {
-                Style::Rect(color) => color.0,
-            };
-            buffer[i * size..(i + 1) * size].copy_from_slice(bytemuck::cast_slice(&color));
-        }
+        // Write styles to buffer
+        write_indexed_slice_to_buffer(&dom.styles, &dom.redraw, &self.styles_buffer, queue);
     }
 
     // ************************************************* //
@@ -315,7 +295,7 @@ impl Pipeline {
     fn create_rects_buffer(device: &Device, size: usize) -> Buffer {
         device.create_buffer(&BufferDescriptor {
             label: Some("Rect Data Buffer"),
-            size: (size * std::mem::size_of::<Rect>()) as u64,
+            size: (size * Rect::SIZE) as u64,
             usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
             mapped_at_creation: false,
         })
@@ -324,7 +304,7 @@ impl Pipeline {
     fn create_styles_buffer(device: &Device, size: usize) -> Buffer {
         device.create_buffer(&BufferDescriptor {
             label: Some("Styles Buffer"),
-            size: (size * std::mem::size_of::<Color>()) as u64,
+            size: (size * Style::SIZE) as u64,
             usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
             mapped_at_creation: false,
         })

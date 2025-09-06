@@ -1,8 +1,10 @@
 mod init;
 mod pipeline;
+mod write_buffer;
 
 use rice_dom::DOM;
 use winit::{
+    dpi::LogicalPosition,
     event::{Event, WindowEvent},
     event_loop::EventLoop,
     window::Window,
@@ -10,12 +12,12 @@ use winit::{
 
 use crate::{init::init_wgpu, pipeline::Pipeline};
 
-pub async fn run(event_loop: EventLoop<()>, window: Window, dom: DOM) {
+pub async fn run(event_loop: EventLoop<()>, window: Window, mut dom: DOM) {
     let window = &window;
     let (device, queue, surface, format, mut config) = init_wgpu(window).await;
 
     let mut pipeline = Pipeline::new(&device, window, format, 100);
-    pipeline.update_elements(&device, &queue, &dom.rects, &dom.styles);
+    dom.dirty.push(0); // Mark the root node as dirty
 
     event_loop
         .run(move |event, target| {
@@ -28,16 +30,19 @@ pub async fn run(event_loop: EventLoop<()>, window: Window, dom: DOM) {
                         surface.configure(&device, &config);
                         pipeline.update_screen(&queue, window);
                         window.request_redraw();
+                        dom.dirty.push(0); // Mark the root node as dirty
                     }
                     WindowEvent::RedrawRequested => {
-                        let size = window.inner_size();
-                        // DEBUG
-                        println!(
-                            "Redrawing with size: {}x{} - scale {}",
-                            size.width,
-                            size.height,
-                            window.scale_factor()
-                        );
+                        // TODO : decide of redrawing, depending on dirty elements, screen changed, etc
+                        if dom.dirty.is_empty() {
+                            return;
+                        }
+                        dom.compute_redraw();
+                        pipeline.update_elements(&device, &queue, &dom);
+                        let n = dom.redraw.len();
+                        dom.dirty.clear();
+                        dom.redraw.clear();
+
                         let frame = surface
                             .get_current_texture()
                             .expect("Failed to acquire next swap chain texture");
@@ -68,7 +73,8 @@ pub async fn run(event_loop: EventLoop<()>, window: Window, dom: DOM) {
 
                             pipeline.bind(&mut rpass);
                             // TODO: count how many rects to draw
-                            rpass.draw_indexed(0..6, 0, 0..1);
+                            // Need a tracker for dirty elements + last count
+                            rpass.draw_indexed(0..6, 0, 0..n as u32);
                         }
 
                         queue.submit(Some(encoder.finish()));
@@ -76,6 +82,22 @@ pub async fn run(event_loop: EventLoop<()>, window: Window, dom: DOM) {
                         frame.present();
                     }
                     WindowEvent::CloseRequested => target.exit(),
+                    WindowEvent::CursorMoved { position, .. } => {
+                        let position: LogicalPosition<i32> =
+                            position.to_logical(window.scale_factor());
+                        let mouse = [position.x, position.y];
+
+                        dom.handle_mouse(mouse);
+                        window.request_redraw();
+                    }
+                    WindowEvent::CursorLeft { .. } => {
+                        if let Some(index) = dom.hovered {
+                            dom.hovered = None;
+                            dom.dirty.push(index);
+
+                            window.request_redraw();
+                        }
+                    }
                     _ => {}
                 };
             }

@@ -29,17 +29,20 @@ fn vertex_shader(
     var size: vec2<f32> = vec2<f32>(size_i);
     var offset: vec2<f32> = vec2<f32>(offset_i);
 
+    // BUG: missing factor 2 because of HDPI scaling?
+    let scale: f32 = 2 * screen.scale;
+
     // Pass physical size & position to fragment shader
-    out.size = size * screen.scale;
-    out.offset = offset * screen.scale;
+    out.size = size * scale;
+    out.offset = offset * scale;
     out.color = color;
 
     // Fix y axis inversion
-    offset.y = screen.size.y / screen.scale - offset.y;
+    offset.y = screen.size.y / scale - offset.y;
     size.y = -size.y;
 
     out.position = vec4<f32>(
-        (vertex * size + offset * 2) * screen.scale / screen.size - 1.0,
+        (vertex * size + offset * 2) * scale / screen.size - 1.0,
         0.0,
         1.0
     );

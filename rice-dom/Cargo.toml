@@ -1,0 +1,7 @@
+[package]
+name = "rice-dom"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rice-layout = { path = "../rice-layout" }
