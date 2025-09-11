@@ -1,10 +1,11 @@
 //! DOM management crate
 
 mod colors;
+mod dense;
 mod dom;
 mod mouse;
 mod styles;
 
 pub use colors::Color;
 pub use dom::DOM;
-pub use styles::{Style, StyleRule, StyleRules};
+pub use styles::{ComputedStyle, StyleProp, StyleSheet, StyleValue};

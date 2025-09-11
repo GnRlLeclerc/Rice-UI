@@ -2,7 +2,7 @@
 
 use rice_layout::{Layout, Rect, compute_layout};
 
-use crate::{Style, StyleRules, mouse::recurse_mouse};
+use crate::{ComputedStyle, StyleSheet, mouse::recurse_mouse};
 
 /// Main arena DOM
 pub struct DOM {
@@ -13,9 +13,9 @@ pub struct DOM {
     /// Children indices for each node
     pub children: Vec<Vec<usize>>,
     /// Computed styles from style rules (ready to be written to a buffer)
-    pub styles: Vec<Style>,
+    pub styles: Vec<ComputedStyle>,
     /// Style rules for each node
-    pub styles_rules: Vec<StyleRules>,
+    pub stylesheets: Vec<StyleSheet>,
 
     /// Hover state
     pub hovered: Option<usize>,
@@ -36,7 +36,7 @@ impl DOM {
             rects: Vec::new(),
             children: Vec::new(),
             styles: Vec::new(),
-            styles_rules: Vec::new(),
+            stylesheets: Vec::new(),
 
             hovered: None,
             clicked: None,
@@ -51,19 +51,19 @@ impl DOM {
     }
 
     /// Insert a root node into the arena
-    pub fn insert(&mut self, layout: Layout, style_rules: StyleRules) -> usize {
-        let mut style = Style::default();
-        style_rules.apply_default(&mut style);
+    pub fn insert(&mut self, layout: Layout, stylesheet: StyleSheet) -> usize {
+        let mut style = ComputedStyle::default();
+        stylesheet.apply_default(&mut style);
         self.layouts.push(layout);
         self.rects.push(Rect::default());
         self.children.push(vec![]);
-        self.styles_rules.push(style_rules);
+        self.stylesheets.push(stylesheet);
         self.styles.push(style);
         self.layouts.len() - 1
     }
 
     /// Insert a child node into the arena
-    pub fn insert_child(&mut self, layout: Layout, style: StyleRules, parent: usize) -> usize {
+    pub fn insert_child(&mut self, layout: Layout, style: StyleSheet, parent: usize) -> usize {
         let index = self.insert(layout, style);
         self.children[parent].push(index);
         index
@@ -80,20 +80,21 @@ impl DOM {
 
         // 2. If different, handle drawing the new and redrawing the old
         if let Some(old) = self.hovered
-            && !self.styles_rules[old].hovered.is_empty()
+            && !self.stylesheets[old].hovered.is_empty()
         {
-            // TODO: completely reverse hover rules
-            self.styles_rules[old].apply_default(&mut self.styles[old]);
+            self.stylesheets[old].reset_hover(&mut self.styles[old]);
             self.dirty.push(old);
         }
 
         if let Some(new) = index
-            && !self.styles_rules[new].hovered.is_empty()
+            && !self.stylesheets[new].hovered.is_empty()
         {
-            self.styles_rules[new].apply_hovered(&mut self.styles[new]);
+            self.stylesheets[new].apply_hovered(&mut self.styles[new]);
             self.dirty.push(new);
         }
         self.hovered = index;
+
+        // TODO: handle clicked state as well (style is ready)
     }
 
     /// Compute the indices of the rectangles that need to be redrawn, in ascending z-index

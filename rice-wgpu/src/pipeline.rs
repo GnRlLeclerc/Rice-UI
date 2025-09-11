@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 
-use rice_dom::{DOM, Style};
+use rice_dom::{ComputedStyle, DOM};
 use rice_layout::Rect;
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},
@@ -304,7 +304,7 @@ impl Pipeline {
     fn create_styles_buffer(device: &Device, size: usize) -> Buffer {
         device.create_buffer(&BufferDescriptor {
             label: Some("Styles Buffer"),
-            size: (size * Style::SIZE) as u64,
+            size: (size * ComputedStyle::SIZE) as u64,
             usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
             mapped_at_creation: false,
         })

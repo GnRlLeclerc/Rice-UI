@@ -2,7 +2,7 @@
 
 use std::num::NonZeroU64;
 
-use rice_dom::{Color, Style};
+use rice_dom::{Color, ComputedStyle};
 use rice_layout::Rect;
 use wgpu::*;
 
@@ -36,7 +36,7 @@ impl WriteBuffer for Color {
     }
 }
 
-impl WriteBuffer for Style {
+impl WriteBuffer for ComputedStyle {
     const SIZE: usize = Color::SIZE;
 
     fn write_buffer(&self, buffer: &mut [u8]) {
