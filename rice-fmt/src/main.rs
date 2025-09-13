@@ -16,9 +16,10 @@ mod utils;
 #[derive(clap::Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// File or folder to format
+    /// File or folder to format or contents to be formatted
+    /// If absent, read from stdin
     #[arg(index = 1)]
-    path: String,
+    path: Option<String>,
 
     /// Check formatting
     #[arg(short, long, default_value_t = false)]
@@ -33,40 +34,62 @@ fn main() {
     let args = Args::parse();
     let mut success = true;
 
-    if Path::new(&args.path).is_dir() {
-        for entry in WalkDir::new(&args.path).into_iter().filter_map(|e| e.ok()) {
-            // Filter out non .rice files
-            match entry.file_name().to_str() {
-                Some(name) => {
-                    if !name.ends_with(".rice") {
-                        continue;
+    if let Some(path) = &args.path {
+        if Path::new(path).is_dir() {
+            for entry in WalkDir::new(path).into_iter().filter_map(|e| e.ok()) {
+                // Filter out non .rice files
+                match entry.file_name().to_str() {
+                    Some(name) => {
+                        if !name.ends_with(".rice") {
+                            continue;
+                        }
                     }
+                    None => continue,
                 }
-                None => continue,
-            }
 
-            success = match format_file(entry.path(), args.inplace, args.check) {
-                Ok(s) => success && s,
+                success = match format_file(entry.path(), args.inplace, args.check) {
+                    Ok(s) => success && s,
+                    Err(e) => {
+                        eprintln!("Error formatting file {}: {}", entry.path().display(), e);
+                        eprintln!("Aborting.");
+                        std::process::exit(1);
+                    }
+                };
+            }
+        } else {
+            success = match format_file(path, args.inplace, args.check) {
+                Ok(s) => s,
                 Err(e) => {
-                    eprintln!("Error formatting file {}: {}", entry.path().display(), e);
-                    eprintln!("Aborting.");
+                    eprintln!("Error formatting file {}: {}", path, e);
                     std::process::exit(1);
                 }
             };
         }
+
+        if args.check && !success {
+            eprintln!("Improper formatting for path {}", path);
+            std::process::exit(1);
+        }
     } else {
-        success = match format_file(&args.path, args.inplace, args.check) {
-            Ok(s) => s,
+        let content = io::read_to_string(io::stdin())
+            .context("Failed to read from stdin")
+            .unwrap();
+        match format_string(&content) {
+            Ok(formatted) => {
+                if args.check {
+                    if formatted.cmp(&content) != std::cmp::Ordering::Equal {
+                        eprintln!("Improper formatting for stdin");
+                        std::process::exit(1);
+                    }
+                } else {
+                    println!("{}", formatted);
+                }
+            }
             Err(e) => {
-                eprintln!("Error formatting file {}: {}", &args.path, e);
+                eprintln!("Error formatting stdin: {}", e);
                 std::process::exit(1);
             }
-        };
-    }
-
-    if args.check && !success {
-        eprintln!("Improper formatting for path {}", &args.path);
-        std::process::exit(1);
+        }
     }
 }
 
@@ -103,4 +126,21 @@ pub fn format_file<P: AsRef<Path>>(path: P, inplace: bool, check: bool) -> Resul
     }
 
     Ok(true)
+}
+
+pub fn format_string(input: &str) -> Result<String> {
+    let mut parser = tree_sitter::Parser::new();
+    parser
+        .set_language(&rice_grammar::LANGUAGE.into())
+        .context("Error loading Rice grammar")?;
+
+    let tree = parser
+        .parse(input, None)
+        .context("Error parsing content with Rice grammar")?;
+
+    let mut buffer = Vec::new();
+    format_source_file(tree, input.as_bytes(), &mut buffer)?;
+    let formatted = String::from_utf8(buffer).expect("Invalid UTF-8");
+
+    Ok(formatted)
 }
