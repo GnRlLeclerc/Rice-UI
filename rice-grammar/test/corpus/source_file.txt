@@ -2,6 +2,8 @@
 Source File root
 ==================
 
+// Root comment
+
 /// Some enum
 enum MyEnum { stuff }
 
@@ -22,6 +24,7 @@ MyComponent {
 ---
 
 (source_file
+  (comment)
   (enum_decl
     (docstring)
     (classname)
@@ -39,6 +42,7 @@ MyComponent {
     (classname)
     (property
       (propname)
-      (string))
+      (value
+        (string)))
     (component
       (classname))))

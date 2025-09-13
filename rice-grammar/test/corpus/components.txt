@@ -10,6 +10,7 @@ MyComponent {
   fraction: 1fr
   percentage: 100%
   value: identifier
+  color: #ff00ff
 
   NestedComponent {
   }
@@ -22,24 +23,35 @@ MyComponent {
     (classname)
     (property
       (propname)
-      (string))
+      (value
+        (string)))
     (property
       (propname)
-      (boolean))
+      (value
+        (boolean)))
     (property
       (propname)
-      (boolean))
+      (value
+        (boolean)))
     (property
       (propname)
-      (pixels))
+      (value
+        (pixels)))
     (property
       (propname)
-      (fraction))
+      (value
+        (fraction)))
     (property
       (propname)
-      (percentage))
+      (value
+        (percentage)))
     (property
       (propname)
-      (identifier))
+      (value
+        (identifier)))
+    (property
+      (propname)
+      (value
+        (hex_color)))
     (component
       (classname))))

@@ -105,6 +105,7 @@ export default grammar({
         $.fraction,
         $.percentage,
         $.identifier,
+        $.hex_color,
       ),
 
     boolean: (_) => choice("true", "false"),
@@ -120,5 +121,8 @@ export default grammar({
 
     // Percentage amounts (e.g. 50%, 50.5%)
     percentage: (_) => /[0-9]+(?:\.[0-9]+)?%/,
+
+    // Hex color
+    hex_color: (_) => /#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})/,
   },
 });

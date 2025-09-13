@@ -44,4 +44,5 @@ component MyComponent {
         (classname)
         (property
           (propname)
-          (string))))))
+          (value
+            (string)))))))
