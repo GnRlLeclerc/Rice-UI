@@ -5,6 +5,7 @@ use crate::dense::DenseMap;
 use crate::Color;
 
 /// Style rules for a component
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct StyleSheet {
     pub default: DenseMap<StyleValue>,
     pub hovered: DenseMap<StyleValue>,
@@ -33,6 +34,12 @@ impl TryFrom<u8> for StyleProp {
 #[derive(Debug, Clone, PartialEq)]
 pub enum StyleValue {
     Color(Color),
+}
+
+impl Default for StyleValue {
+    fn default() -> Self {
+        StyleValue::Color(Color::default())
+    }
 }
 
 /// Computed style ready for rendering

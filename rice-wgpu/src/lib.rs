@@ -5,7 +5,7 @@ mod write_buffer;
 use rice_dom::DOM;
 use winit::{
     dpi::LogicalPosition,
-    event::{Event, WindowEvent},
+    event::{ElementState, Event, MouseButton, WindowEvent},
     event_loop::EventLoop,
     window::Window,
 };
@@ -72,8 +72,6 @@ pub async fn run(event_loop: EventLoop<()>, window: Window, mut dom: DOM) {
                                 });
 
                             pipeline.bind(&mut rpass);
-                            // TODO: count how many rects to draw
-                            // Need a tracker for dirty elements + last count
                             rpass.draw_indexed(0..6, 0, 0..n as u32);
                         }
 
@@ -87,14 +85,28 @@ pub async fn run(event_loop: EventLoop<()>, window: Window, mut dom: DOM) {
                             position.to_logical(window.scale_factor());
                         let mouse = [position.x, position.y];
 
-                        dom.handle_mouse(mouse);
+                        dom.handle_mouse_moved(mouse);
                         window.request_redraw();
                     }
                     WindowEvent::CursorLeft { .. } => {
-                        if let Some(index) = dom.hovered {
-                            dom.hovered = None;
-                            dom.dirty.push(index);
-
+                        dom.reset_mouse();
+                        if dom.dirty.len() > 0 {
+                            window.request_redraw();
+                        }
+                    }
+                    WindowEvent::MouseInput { state, button, .. } => {
+                        match button {
+                            MouseButton::Left => match state {
+                                ElementState::Pressed => {
+                                    dom.handle_mouse_clicked(true);
+                                }
+                                ElementState::Released => {
+                                    dom.handle_mouse_clicked(false);
+                                }
+                            },
+                            _ => {}
+                        };
+                        if dom.dirty.len() > 0 {
                             window.request_redraw();
                         }
                     }

@@ -17,6 +17,8 @@ pub struct DOM {
     /// Style rules for each node
     pub stylesheets: Vec<StyleSheet>,
 
+    /// Mouse position
+    pub mouse: [i32; 2],
     /// Hover state
     pub hovered: Option<usize>,
     /// Clicked state
@@ -38,6 +40,7 @@ impl DOM {
             styles: Vec::new(),
             stylesheets: Vec::new(),
 
+            mouse: [-1, -1],
             hovered: None,
             clicked: None,
             dirty: Vec::new(),
@@ -69,16 +72,23 @@ impl DOM {
         index
     }
 
-    /// Handle mouse position (hover state, dirty nodes, etc)
-    pub fn handle_mouse(&mut self, mouse: [i32; 2]) {
-        // 1. Get the index of the newly hovered node
+    /// Handle mouse position movement
+    pub fn handle_mouse_moved(&mut self, mouse: [i32; 2]) {
+        self.mouse = mouse;
+
+        // 1. If something is clicked, ignore hovers
+        if self.clicked.is_some() {
+            return;
+        }
+
+        // 2. Else, get the index of the newly hovered node
         let index = recurse_mouse(0, &self.rects, &self.children, &mouse);
 
         if index == self.hovered {
             return;
         }
 
-        // 2. If different, handle drawing the new and redrawing the old
+        // 3. If different, handle drawing the new and redrawing the old
         if let Some(old) = self.hovered
             && !self.stylesheets[old].hovered.is_empty()
         {
@@ -93,8 +103,65 @@ impl DOM {
             self.dirty.push(new);
         }
         self.hovered = index;
+    }
 
-        // TODO: handle clicked state as well (style is ready)
+    /// Handle mouse clicks
+    pub fn handle_mouse_clicked(&mut self, clicked: bool) {
+        // Ignore if the state didn't change
+        if (self.clicked.is_some() && clicked) || (self.clicked.is_none() && !clicked) {
+            return;
+        }
+
+        // Get index of currently hovered position
+        let index = recurse_mouse(0, &self.rects, &self.children, &self.mouse);
+
+        // If clicked, reset hover state, then apply clicked state
+        if clicked {
+            // Reset hover state
+            if let Some(hovered) = self.hovered {
+                self.stylesheets[hovered].reset_hover(&mut self.styles[hovered]);
+                self.dirty.push(hovered);
+                self.hovered = None;
+            }
+
+            self.clicked = index;
+
+            // Apply clicked state
+            if let Some(index) = index {
+                self.stylesheets[index].apply_clicked(&mut self.styles[index]);
+                self.dirty.push(index);
+            }
+        } else {
+            // Reset clicked state
+            if let Some(clicked) = self.clicked {
+                self.stylesheets[clicked].reset_clicked(&mut self.styles[clicked]);
+                self.dirty.push(clicked);
+            }
+
+            self.clicked = None;
+
+            // Re-apply hover state if applicable
+            if let Some(index) = index {
+                self.stylesheets[index].apply_hovered(&mut self.styles[index]);
+                self.dirty.push(index);
+                self.hovered = Some(index);
+            }
+        }
+    }
+
+    /// Reset clicked and hover states
+    pub fn reset_mouse(&mut self) {
+        if let Some(clicked) = self.clicked {
+            self.stylesheets[clicked].reset_clicked(&mut self.styles[clicked]);
+            self.dirty.push(clicked);
+            self.clicked = None;
+        }
+        if let Some(hovered) = self.hovered {
+            self.stylesheets[hovered].reset_hover(&mut self.styles[hovered]);
+            self.dirty.push(hovered);
+            self.hovered = None;
+        }
+        self.mouse = [-1, -1];
     }
 
     /// Compute the indices of the rectangles that need to be redrawn, in ascending z-index

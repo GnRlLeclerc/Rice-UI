@@ -9,6 +9,7 @@
 ///
 /// Issues:
 /// - O(n) insert / remove (but should not happen often)
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct DenseMap<V> {
     mask: u64,
     values: Vec<V>,
