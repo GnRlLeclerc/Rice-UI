@@ -7,6 +7,9 @@ use crate::{ComputedStyle, StyleSheet, mouse::recurse_mouse};
 /// Main arena DOM
 #[derive(Debug)]
 pub struct DOM {
+    /// Root node index
+    pub root: usize,
+
     /// Layout rules
     pub layouts: Vec<Layout>,
     /// Computed sizes & positions
@@ -35,6 +38,8 @@ impl DOM {
     /// Create a new empty arena
     pub fn new() -> Self {
         Self {
+            root: 0,
+
             layouts: Vec::new(),
             rects: Vec::new(),
             children: Vec::new(),
@@ -178,22 +183,42 @@ impl DOM {
     }
 
     /// Compute the indices of the rectangles that need to be redrawn, in ascending z-index
-    /// TODO: replace naive recursion to avoid duplicates
+    ///
+    /// Done by travesring the DOM tree, and adding recursively all indices of subtrees of dirty
+    /// nodes. This ensures that parents are drawn before children, and that there are no
+    /// duplicates.
     pub fn compute_redraw(&mut self) -> &[usize] {
         self.redraw.clear();
 
-        for &index in &self.dirty {
-            recurse_children(index, &self.children, &mut self.redraw);
-        }
+        // Recurse from the root node
+        recurse_explore_children(self.root, &self.children, &self.dirty, &mut self.redraw);
 
         &self.redraw
     }
 }
 
 /// Recursively add children indices of the given index to the output vector
-fn recurse_children(index: usize, children: &[Vec<usize>], out: &mut Vec<usize>) {
+fn recurse_add_children(index: usize, children: &[Vec<usize>], out: &mut Vec<usize>) {
     out.push(index);
     for &child in &children[index] {
-        recurse_children(child, children, out);
+        recurse_add_children(child, children, out);
+    }
+}
+
+/// Recursively explore children until a dirty node is found.
+/// Dirty subtrees are then explored using `recurse_add_children`.
+fn recurse_explore_children(
+    index: usize,
+    children: &[Vec<usize>],
+    dirty: &[usize],
+    out: &mut Vec<usize>,
+) {
+    if dirty.contains(&index) {
+        recurse_add_children(index, children, out);
+        return;
+    }
+
+    for &child in &children[index] {
+        recurse_explore_children(child, children, dirty, out);
     }
 }

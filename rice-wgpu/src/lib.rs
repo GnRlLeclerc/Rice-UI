@@ -17,7 +17,7 @@ pub async fn run(event_loop: EventLoop<()>, window: Window, mut dom: DOM) {
     let (device, queue, surface, format, mut config) = init_wgpu(window).await;
 
     let mut pipeline = Pipeline::new(&device, window, format, 100);
-    dom.dirty.push(0); // Mark the root node as dirty
+    dom.dirty.push(dom.root); // Mark the root node as dirty
 
     event_loop
         .run(move |event, target| {
@@ -30,7 +30,7 @@ pub async fn run(event_loop: EventLoop<()>, window: Window, mut dom: DOM) {
                         surface.configure(&device, &config);
                         pipeline.update_screen(&queue, window);
                         window.request_redraw();
-                        dom.dirty.push(0); // Mark the root node as dirty
+                        dom.dirty.push(dom.root); // Mark the root node as dirty
                     }
                     WindowEvent::RedrawRequested => {
                         // TODO : decide of redrawing, depending on dirty elements, screen changed, etc
