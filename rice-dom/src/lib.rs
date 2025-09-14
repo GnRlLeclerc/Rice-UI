@@ -1,7 +1,6 @@
 //! DOM management crate
 
 mod colors;
-mod dense;
 mod dom;
 mod mouse;
 mod styles;

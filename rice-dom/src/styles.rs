@@ -1,33 +1,21 @@
 //! Style rules for rendering components
 
-use crate::dense::DenseMap;
+use rustc_hash::FxHashMap;
 
 use crate::Color;
 
 /// Style rules for a component
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct StyleSheet {
-    pub default: DenseMap<StyleValue>,
-    pub hovered: DenseMap<StyleValue>,
-    pub clicked: DenseMap<StyleValue>,
+    pub default: FxHashMap<StyleProp, StyleValue>,
+    pub hovered: FxHashMap<StyleProp, StyleValue>,
+    pub clicked: FxHashMap<StyleProp, StyleValue>,
 }
 
 /// Style properties enum
-#[repr(u8)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum StyleProp {
-    BackgroundColor = 0,
-}
-
-impl TryFrom<u8> for StyleProp {
-    type Error = ();
-
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(StyleProp::BackgroundColor),
-            _ => Err(()),
-        }
-    }
+    BackgroundColor,
 }
 
 /// Value for a style property
@@ -93,21 +81,19 @@ impl StyleSheet {
     }
 
     /// Apply all styles from a map to a computed style
-    fn apply_styles(map: &DenseMap<StyleValue>, style: &mut ComputedStyle) {
+    fn apply_styles(map: &FxHashMap<StyleProp, StyleValue>, style: &mut ComputedStyle) {
         for (prop, value) in map.iter() {
-            let prop = StyleProp::try_from(prop).expect("Invalid style property");
             prop.apply(value, style);
         }
     }
 
     /// Reset all style properties from a map to their default values, granularly.
     /// If a property does not exist in the default map, it is reset to the hardcoded default.
-    fn reset_styles(&self, map: &DenseMap<StyleValue>, style: &mut ComputedStyle) {
+    fn reset_styles(&self, map: &FxHashMap<StyleProp, StyleValue>, style: &mut ComputedStyle) {
         for (prop, _) in map.iter() {
-            let prop = StyleProp::try_from(prop).expect("Invalid style property");
-            if self.default.get(prop as u8).is_some() {
+            if self.default.get(prop).is_some() {
                 // If the property exists in the default map, reset to that value
-                if let Some(default_value) = self.default.get(prop as u8) {
+                if let Some(default_value) = self.default.get(prop) {
                     prop.apply(default_value, style);
                 }
             } else {

@@ -40,8 +40,8 @@ pub fn parse_property(
             layout.size[1] = parse_size(value.expect("Expected value node"), content);
         }
         "bg_color" => {
-            stylesheet.default.set(
-                StyleProp::BackgroundColor as u8,
+            stylesheet.default.insert(
+                StyleProp::BackgroundColor,
                 StyleValue::Color(parse_color(value.expect("Expected value node"), content)),
             );
         }
