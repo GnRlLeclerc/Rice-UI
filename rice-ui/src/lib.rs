@@ -9,3 +9,7 @@ pub mod wgpu {
 pub mod dom {
     pub use rice_dom::*;
 }
+
+pub mod parser {
+    pub use rice_parser::*;
+}

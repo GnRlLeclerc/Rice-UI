@@ -6,4 +6,5 @@ edition = "2024"
 [dependencies]
 rice-dom = { path = "../rice-dom" }
 rice-layout = { path = "../rice-layout" }
+rice-parser = { path = "../rice-parser" }
 rice-wgpu = { path = "../rice-wgpu" }

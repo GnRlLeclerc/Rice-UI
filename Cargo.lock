@@ -1119,7 +1119,9 @@ dependencies = [
 name = "parser"
 version = "0.1.0"
 dependencies = [
+ "rice-dom",
  "rice-grammar",
+ "rice-parser",
  "tree-sitter",
 ]
 
@@ -1335,6 +1337,12 @@ version = "0.1.0"
 [[package]]
 name = "rice-parser"
 version = "0.1.0"
+dependencies = [
+ "rice-dom",
+ "rice-grammar",
+ "rice-layout",
+ "tree-sitter",
+]
 
 [[package]]
 name = "rice-ui"
@@ -1342,6 +1350,7 @@ version = "0.1.0"
 dependencies = [
  "rice-dom",
  "rice-layout",
+ "rice-parser",
  "rice-wgpu",
 ]
 

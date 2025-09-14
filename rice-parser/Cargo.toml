@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+rice-dom = { path = "../rice-dom" }
 rice-grammar = { path = "../rice-grammar" }
+rice-layout = { path = "../rice-layout" }
 tree-sitter = { workspace = true }

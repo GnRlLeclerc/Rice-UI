@@ -5,6 +5,7 @@ use rice_layout::{Layout, Rect, compute_layout};
 use crate::{ComputedStyle, StyleSheet, mouse::recurse_mouse};
 
 /// Main arena DOM
+#[derive(Debug)]
 pub struct DOM {
     /// Layout rules
     pub layouts: Vec<Layout>,
@@ -63,6 +64,18 @@ impl DOM {
         self.stylesheets.push(stylesheet);
         self.styles.push(style);
         self.layouts.len() - 1
+    }
+
+    /// Insert a node with children into the arena
+    pub fn insert_with_children(
+        &mut self,
+        layout: Layout,
+        style: StyleSheet,
+        children: Vec<usize>,
+    ) -> usize {
+        let index = self.insert(layout, style);
+        self.children[index] = children;
+        index
     }
 
     /// Insert a child node into the arena
