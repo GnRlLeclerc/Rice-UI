@@ -11,6 +11,7 @@ Inspired by the [Clay](https://github.com/nicbarker/clay) UI layout library.
 - [`rice-fmt`](./rice-fmt): formatter for Rice DSL
 - [`rice-grammar`](./rice-grammar): treesitter grammar for Rice DSL
 - [`rice-layout`](./rice-layout): layout computation framework
+- [`rice-parser`](./rice-parser): parse Rice DSL into DOM
 - [`rice-ui`](./rice-ui): main crate
 - [`rice-wgpu`](./rice-wgpu): WGPU rendering for Rice UI
 
@@ -25,9 +26,9 @@ Inspired by the [Clay](https://github.com/nicbarker/clay) UI layout library.
   - [x] min/max height/width for fit & expand sizes
   - [ ] grid
 - [ ] WGPU rendering
-  - [ ] basic rendering
+  - [x] basic rendering
   - [ ] common styles (easy theme / style overrides)
   - [ ] animation support (outside of manual UI update)
 - [ ] Scripting
-  - [ ] declare layouts in JSON (or the likes) + hot reload
+  - [ ] declare layouts in Rice DSL + hot reload
   - [ ] define logic in Lua (or the likes) + hot reload

@@ -59,7 +59,7 @@ pub fn write_indexed_slice_to_buffer<T: WriteBuffer>(
         .write_buffer_with(buffer, 0, size)
         .expect("Failed to map buffer for writing");
 
-    for &i in indices {
-        data[i].write_buffer(&mut buffer[i * T::SIZE..(i + 1) * T::SIZE]);
+    for (i, &idx) in indices.iter().enumerate() {
+        data[idx].write_buffer(&mut buffer[i * T::SIZE..(i + 1) * T::SIZE]);
     }
 }

@@ -125,7 +125,7 @@ impl Pipeline {
             }],
         };
         let rects_layout = VertexBufferLayout {
-            array_stride: std::mem::size_of::<Rect>() as BufferAddress,
+            array_stride: std::mem::size_of::<[i32; 4]>() as BufferAddress,
             step_mode: VertexStepMode::Instance,
             attributes: &[
                 // Size
@@ -137,7 +137,7 @@ impl Pipeline {
                 // Position
                 VertexAttribute {
                     format: VertexFormat::Sint32x2,
-                    offset: std::mem::size_of::<[f32; 2]>() as BufferAddress,
+                    offset: std::mem::size_of::<[i32; 2]>() as BufferAddress,
                     shader_location: 2,
                 },
             ],
