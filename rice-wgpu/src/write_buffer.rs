@@ -16,14 +16,14 @@ pub trait WriteBuffer {
 }
 
 impl WriteBuffer for Rect {
-    const SIZE: usize = std::mem::size_of::<[i32; 4]>();
+    const SIZE: usize = std::mem::size_of::<[f32; 4]>();
 
     fn write_buffer(&self, buffer: &mut [u8]) {
         buffer[..Self::SIZE].copy_from_slice(bytemuck::bytes_of(&[
-            self.size[0],
-            self.size[1],
-            self.position[0],
-            self.position[1],
+            self.size[0] as f32,
+            self.size[1] as f32,
+            self.position[0] as f32,
+            self.position[1] as f32,
         ]));
     }
 }

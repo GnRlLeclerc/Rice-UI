@@ -17,10 +17,10 @@ const INDICES: &[u16] = &[0, 1, 2, 2, 3, 0];
 
 /// Base vertices to draw a rectangle from 2 triangles
 const VERTICES: &[f32] = &[
-    -1.0, -1.0, // bottom left
-    1.0, -1.0, // bottom right
+    0.0, 0.0, // bottom left
+    1.0, 0.0, // bottom right
     1.0, 1.0, // top right
-    -1.0, 1.0, // top left
+    0.0, 1.0, // top left
 ];
 
 /// Rendering pipeline manager
@@ -125,25 +125,25 @@ impl Pipeline {
             }],
         };
         let rects_layout = VertexBufferLayout {
-            array_stride: std::mem::size_of::<[i32; 4]>() as BufferAddress,
+            array_stride: Rect::SIZE as BufferAddress,
             step_mode: VertexStepMode::Instance,
             attributes: &[
                 // Size
                 VertexAttribute {
-                    format: VertexFormat::Sint32x2,
+                    format: VertexFormat::Float32x2,
                     offset: 0,
                     shader_location: 1,
                 },
                 // Position
                 VertexAttribute {
-                    format: VertexFormat::Sint32x2,
-                    offset: std::mem::size_of::<[i32; 2]>() as BufferAddress,
+                    format: VertexFormat::Float32x2,
+                    offset: std::mem::size_of::<[f32; 2]>() as BufferAddress,
                     shader_location: 2,
                 },
             ],
         };
         let styles_layout = VertexBufferLayout {
-            array_stride: std::mem::size_of::<[f32; 4]>() as BufferAddress,
+            array_stride: ComputedStyle::SIZE as BufferAddress,
             step_mode: VertexStepMode::Instance,
             // RGBA color
             attributes: &[VertexAttribute {

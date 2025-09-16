@@ -19,30 +19,22 @@ struct VertexOutput {
 @vertex
 fn vertex_shader(
     @location(0) vertex: vec2<f32>,
-    @location(1) size_i: vec2<i32>,
-    @location(2) offset_i: vec2<i32>,
+    @location(1) size: vec2<f32>,
+    @location(2) offset: vec2<f32>,
     @location(3) color: vec4<f32>,
 ) -> VertexOutput {
     var out: VertexOutput;
 
-    // Cast i32 to f32
-    var size: vec2<f32> = vec2<f32>(size_i);
-    var offset: vec2<f32> = vec2<f32>(offset_i);
-
-    // BUG: missing factor 2 because of HDPI scaling?
-    let scale: f32 = 2 * screen.scale;
-
     // Pass physical size & position to fragment shader
-    out.size = size * scale;
-    out.offset = offset * scale;
+    out.size = size * screen.scale;
+    out.offset = offset * screen.scale;
     out.color = color;
 
-    // Fix y axis inversion
-    offset.y = screen.size.y / scale - offset.y;
-    size.y = -size.y;
+    var position: vec2<f32> = (vertex * size + offset) * screen.scale / screen.size * 2.0 - 1.0;
+    position.y *= -1.0; // Invert Y axis
 
     out.position = vec4<f32>(
-        (vertex * size + offset * 2) * scale / screen.size - 1.0,
+        position,
         0.0,
         1.0
     );
