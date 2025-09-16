@@ -131,14 +131,15 @@ impl DOM {
         }
 
         // Get index of currently hovered position
-        let index = recurse_mouse(0, &self.rects, &self.children, &self.mouse);
+        let index = recurse_mouse(self.root, &self.rects, &self.children, &self.mouse);
 
         // If clicked, reset hover state, then apply clicked state
         if clicked {
             // Reset hover state
             if let Some(hovered) = self.hovered {
-                self.stylesheets[hovered].reset_hover(&mut self.styles[hovered]);
-                self.dirty.push(hovered);
+                if self.stylesheets[hovered].reset_hover(&mut self.styles[hovered]) {
+                    self.dirty.push(hovered);
+                }
                 self.hovered = None;
             }
 
@@ -146,22 +147,25 @@ impl DOM {
 
             // Apply clicked state
             if let Some(index) = index {
-                self.stylesheets[index].apply_clicked(&mut self.styles[index]);
-                self.dirty.push(index);
+                if self.stylesheets[index].apply_clicked(&mut self.styles[index]) {
+                    self.dirty.push(index);
+                }
             }
         } else {
             // Reset clicked state
             if let Some(clicked) = self.clicked {
-                self.stylesheets[clicked].reset_clicked(&mut self.styles[clicked]);
-                self.dirty.push(clicked);
+                if self.stylesheets[clicked].reset_clicked(&mut self.styles[clicked]) {
+                    self.dirty.push(clicked);
+                }
             }
 
             self.clicked = None;
 
             // Re-apply hover state if applicable
             if let Some(index) = index {
-                self.stylesheets[index].apply_hovered(&mut self.styles[index]);
-                self.dirty.push(index);
+                if self.stylesheets[index].apply_hovered(&mut self.styles[index]) {
+                    self.dirty.push(index);
+                }
                 self.hovered = Some(index);
             }
         }
