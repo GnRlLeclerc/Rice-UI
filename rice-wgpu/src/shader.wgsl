@@ -30,7 +30,7 @@ fn vertex_shader(
     out.offset = offset * screen.scale;
     out.color = color;
 
-    var position: vec2<f32> = (vertex * size + offset) * screen.scale / screen.size * 2.0 - 1.0;
+    var position: vec2<f32> = ((vertex + 1) / 2.0 * size + offset) * screen.scale / screen.size * 2.0 - 1.0;
     position.y *= -1.0; // Invert Y axis
 
     out.position = vec4<f32>(
