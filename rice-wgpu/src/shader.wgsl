@@ -13,8 +13,7 @@ struct VertexOutput {
     @location(2) color: vec4<f32>,
 }
 
-@group(0) @binding(0) var<uniform> time: f32;
-@group(0) @binding(1) var<uniform> screen: Screen;
+@group(0) @binding(0) var<uniform> screen: Screen;
 
 @vertex
 fn vertex_shader(

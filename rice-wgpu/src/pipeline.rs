@@ -27,8 +27,6 @@ const VERTICES: &[f32] = &[
 pub struct Pipeline {
     pub pipeline: RenderPipeline,
 
-    /// Timer for animations
-    pub timer_buffer: Buffer,
     /// Screen size & conversion physical <-> logical
     pub screen_buffer: Buffer,
     /// Base rectangle vertex buffer
@@ -58,11 +56,6 @@ impl Pipeline {
         // ***************************************** //
         //                  BUFFERS                  //
         // ***************************************** //
-        let timer_buffer = device.create_buffer_init(&BufferInitDescriptor {
-            label: Some("Timer Buffer"),
-            contents: bytemuck::cast_slice(&[0.0f32]),
-            usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST,
-        });
         let screen = window.inner_size();
         let screen_buffer = device.create_buffer_init(&BufferInitDescriptor {
             label: Some("Screen Buffer"),
@@ -91,28 +84,16 @@ impl Pipeline {
         //             BIND GROUP LAYOUTS            //
         // ***************************************** //
         let uniforms_layout = device.create_bind_group_layout(&BindGroupLayoutDescriptor {
-            entries: &[
-                BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: ShaderStages::VERTEX | ShaderStages::FRAGMENT,
-                    ty: BindingType::Buffer {
-                        ty: BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None,
+            entries: &[BindGroupLayoutEntry {
+                binding: 0,
+                visibility: ShaderStages::VERTEX | ShaderStages::FRAGMENT,
+                ty: BindingType::Buffer {
+                    ty: BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
                 },
-                BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: ShaderStages::VERTEX | ShaderStages::FRAGMENT,
-                    ty: BindingType::Buffer {
-                        ty: BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None,
-                },
-            ],
+                count: None,
+            }],
             label: Some("Uniforms Bind Group Layout"),
         });
         let vertex_layout = VertexBufferLayout {
@@ -158,16 +139,10 @@ impl Pipeline {
         // ***************************************** //
         let uniforms_group = device.create_bind_group(&BindGroupDescriptor {
             layout: &uniforms_layout,
-            entries: &[
-                BindGroupEntry {
-                    binding: 0,
-                    resource: timer_buffer.as_entire_binding(),
-                },
-                BindGroupEntry {
-                    binding: 1,
-                    resource: screen_buffer.as_entire_binding(),
-                },
-            ],
+            entries: &[BindGroupEntry {
+                binding: 0,
+                resource: screen_buffer.as_entire_binding(),
+            }],
             label: Some("Uniforms Bind Group"),
         });
 
@@ -221,7 +196,6 @@ impl Pipeline {
         Self {
             pipeline,
 
-            timer_buffer,
             screen_buffer,
             vertex_buffer,
             rects_buffer,
@@ -249,10 +223,6 @@ impl Pipeline {
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
         render_pass.set_vertex_buffer(1, self.rects_buffer.slice(..));
         render_pass.set_vertex_buffer(2, self.styles_buffer.slice(..));
-    }
-
-    pub fn update_timer(&self, queue: &Queue, time: f32) {
-        queue.write_buffer(&self.timer_buffer, 0, bytemuck::cast_slice(&[time]));
     }
 
     /// Update screen size & scale
