@@ -27,6 +27,9 @@ const VERTICES: &[f32] = &[
 pub struct Pipeline {
     pub pipeline: RenderPipeline,
 
+    /// Amount of elements to draw
+    pub n: u32,
+
     /// Screen size & conversion physical <-> logical
     pub screen_buffer: Buffer,
     /// Base rectangle vertex buffer
@@ -195,6 +198,7 @@ impl Pipeline {
 
         Self {
             pipeline,
+            n: 0,
 
             screen_buffer,
             vertex_buffer,
@@ -208,8 +212,8 @@ impl Pipeline {
         }
     }
 
-    /// Bind the buffers to the render pass
-    pub fn bind(&self, render_pass: &mut RenderPass) {
+    /// Render the pipeline
+    pub fn render(&self, render_pass: &mut RenderPass) {
         // Pipeline
         render_pass.set_pipeline(&self.pipeline);
 
@@ -223,6 +227,9 @@ impl Pipeline {
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
         render_pass.set_vertex_buffer(1, self.rects_buffer.slice(..));
         render_pass.set_vertex_buffer(2, self.styles_buffer.slice(..));
+
+        // Draw call
+        render_pass.draw_indexed(0..6, 0, 0..self.n);
     }
 
     /// Update screen size & scale
@@ -244,12 +251,15 @@ impl Pipeline {
         assert!(dom.rects.len() == dom.styles.len());
         assert!(dom.rects.len() > 0);
 
+        let n = dom.redraw.len();
+
         // Reallocate buffers if needed
-        if dom.rects.len() > self.size {
-            self.rects_buffer = Self::create_rects_buffer(device, dom.rects.len() * 2);
-            self.styles_buffer = Self::create_styles_buffer(device, dom.styles.len() * 2);
+        if n > self.size {
+            self.rects_buffer = Self::create_rects_buffer(device, n * 2);
+            self.styles_buffer = Self::create_styles_buffer(device, n * 2);
             self.size = dom.rects.len() * 2;
         }
+        self.n = n as u32;
 
         // Write rects to buffer
         write_indexed_slice_to_buffer(&dom.rects, &dom.redraw, &self.rects_buffer, queue);

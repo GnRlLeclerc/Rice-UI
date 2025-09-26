@@ -71,8 +71,7 @@ pub async fn run(event_loop: EventLoop<()>, window: Window, mut dom: DOM) {
                                     occlusion_query_set: None,
                                 });
 
-                            pipeline.bind(&mut rpass);
-                            rpass.draw_indexed(0..6, 0, 0..n as u32);
+                            pipeline.render(&mut rpass);
                         }
 
                         queue.submit(Some(encoder.finish()));
