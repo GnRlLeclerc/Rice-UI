@@ -51,6 +51,10 @@ pub fn format_property<W: io::Write>(
                 format_indent(depth, writer)?;
                 writer.write_all(&content[child.byte_range()])?;
             }
+            "identifier" => {
+                writer.write_all(b".")?;
+                writer.write_all(&content[child.byte_range()])?;
+            }
             // Value
             "value" => {
                 writer.write_all(b": ")?;

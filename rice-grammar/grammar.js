@@ -90,7 +90,11 @@ export default grammar({
     // Starts with lowercase letter
     identifier: (_) => /[a-z][a-zA-Z0-9_]*/,
 
-    property: ($) => choice(seq($.propname, ":", $.value), $.propname),
+    property: ($) =>
+      choice(
+        seq($.propname, optional(seq(".", $.identifier)), ":", $.value),
+        $.propname,
+      ),
 
     // ************************************************* //
     //                        VALUES                     //

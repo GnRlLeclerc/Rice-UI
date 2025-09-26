@@ -100,7 +100,7 @@ impl DOM {
         }
 
         // 2. Else, get the index of the newly hovered node
-        let index = recurse_mouse(0, &self.rects, &self.children, &mouse);
+        let index = recurse_mouse(self.root, &self.rects, &self.children, &mouse);
 
         if index == self.hovered {
             return;

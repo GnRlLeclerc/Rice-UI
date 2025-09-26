@@ -12,6 +12,8 @@ MyComponent {
   value: identifier
   color: #ff00ff
 
+  with.modifier: "value"
+
   NestedComponent {
   }
 }
@@ -53,5 +55,10 @@ MyComponent {
       (propname)
       (value
         (hex_color)))
+    (property
+      (propname)
+      (identifier)
+      (value
+        (string)))
     (component
       (classname))))
